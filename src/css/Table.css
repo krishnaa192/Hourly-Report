@@ -1,0 +1,324 @@
+.table-one {
+    font-size: 11px;
+    padding: 1rem;
+    background: white;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    margin-top: 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.breadcrumb-container {
+    margin-top: 8px;
+    border-radius: 5px;
+}
+
+.scroll {
+    overflow: scroll;
+}
+
+.orange2 {
+    color: rgb(23, 23, 23);
+    font-family: "Poppins";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    padding-bottom: 12px;
+}
+
+.mat-mdc-tab-body-content {
+    overflow: hidden !important;
+}
+
+.mdc-tab--active,
+.mdc-tab-indicator--active {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+.head2 {
+    font-family: 'Poppins';
+    color: black;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin-bottom: 0 !important;
+}
+
+.select-date-header {
+    display: flex;
+    align-items: center;
+}
+
+.select-date-range-parent {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 71px;
+}
+
+mat-form-field.start-date-parent {
+    border-radius: 10px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.table {
+    justify-content: center !important;
+    font-family: 'Poppins' !important;
+    font-size: 18px !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+.mat-cell,
+.mat-header-cell .mat-column {
+    text-align: center !important;
+    font-family: 'Poppins' !important;
+    font-size: 12px !important;
+}
+
+::ng-deep .column-borders th,
+.column-borders td {
+    border-right: 1px solid #ccc !important;
+    font-family: 'Poppins';
+    font-size: 12px !important;
+}
+
+table th {
+    font-family: 'Poppins' !important;
+    font-size: 12px;
+}
+
+.mat-mdc-table {
+    vertical-align: middle;
+    white-space: nowrap !important;
+}
+
+.mat-mdc-header-row {
+    height: 35px;
+}
+
+mat-table {
+    width: 100%;
+}
+
+.column-custom-border {
+    font-family: 'Poppins' !important;
+    vertical-align: middle;
+    font-size: 12px;
+    border-right: 1px solid #ccc !important;
+}
+
+.table_heder {
+    font-family: 'Poppins' !important;
+    vertical-align: middle;
+    font-size: 12px;
+    color: #fff;
+    border-right: 1px solid #ccc !important;
+}
+
+.search_export_div {
+    display: flex;
+    align-items: center;
+}
+
+.custom-search-col {
+    display: inherit;
+    gap: 10px;
+    vertical-align: middle;
+    align-items: center;
+    text-align: center;
+    justify-content: end;
+}
+
+input::placeholder {
+    font-size: 12px;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.mat-mdc-option {
+    font-size: 12px !important;
+    min-height: 33px !important;
+}
+
+.scroll_vertical {
+    height: 480px;
+    overflow: scroll;
+    margin-bottom: 10px;
+}
+
+::ng-deep .mat-button-toggle-checked {
+    background-color: rgb(66, 65, 65) !important;
+    color: #fff !important;
+}
+
+.service {
+    font-size: 15px !important;
+    color: #fff !important;
+}
+
+.input_serach_select {
+    width: 100% !important;
+    color: #222;
+    height: 35px !important;
+    font-family: "Poppins" !important;
+    padding-left: 10px !important;
+    font-size: 10px !important;
+    border-radius: 5px !important;
+    border: 1px solid grey !important;
+    position: relative !important;
+}
+
+.input_serach_select::placeholder {
+    color: #000 !important;
+    font-family: 'Poppins';
+}
+
+.control input {
+    width: 100%;
+    display: block;
+    padding: 5px;
+    color: #222;
+    border: .5px solid grey;
+    outline: none;
+    border-radius: 5px;
+    font-family: 'Poppins';
+    font-size: 14px;
+}
+
+.table_heder {
+    font-family: 'Poppins' !important;
+    font-size: 14px;
+    font-weight: bold;
+    border: .5px solid grey;
+    margin-bottom: 0;
+    color: #000000;
+}
+
+.loader {
+    padding-top: 5px;
+    font-size: 20px;
+    font-weight: 500;
+    color: black;
+}
+
+.spinner-3 {
+    width: 50px;
+    padding: 8px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #6263FB;
+    --_m: conic-gradient(#0000 10%, #000), linear-gradient(#000 0 0) content-box;
+    -webkit-mask: var(--_m);
+    mask: var(--_m);
+    -webkit-mask-composite: source-out;
+    mask-composite: subtract;
+    animation: s3 1s infinite linear;
+}
+
+td{
+    font-size: 11px;
+}
+
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .mobile_gap_top {
+        margin-top: 18px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+@media (min-width: 992px) {
+    .table-responsive {
+        overflow: hidden;
+    }
+}
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    border: 1px solid black; /* Full borders around cells */
+    text-align: center;
+    padding: 8px;
+    white-space: nowrap; /* Prevent text from wrapping */
+  }
+  
+  thead th {
+    font-weight: bold;
+  }
+  
+  tbody td {
+    padding: 5px;
+  }
+  .last-row{
+    margin-bottom: 10px;
+  }
+  th{
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px; /* Margin at the bottom of the table */
+    border-spacing: 0; /* Removes default cell spacing */
+  }
+  
+  /* Styling for table headers */
+  th {
+    background-color: #f4f4f4;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  /* Styling for table data cells */
+  td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  /* Add margin-like effect for the last row of each date */
+  tr.last-row {
+    border-bottom: 4px solid #000; /* A thick border to create visual separation */
+  }
+  
+  /* Optional: hover effects for better UX */
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Optional: additional row styling */
+  tr:last-child {
+    margin-bottom: 10px; /* Create spacing between the last row of each date group */
+  }
+  
+
+  /* filter  table */
+  .filter-container{
+    margin-bottom: 10px;
+    border: 2px solid black;
+    padding: 5px;
+  }
+.gap{
+    width: 20px;
+}

@@ -1,158 +1,133 @@
 import React, { useState } from 'react';
-import  {DateRangePicker} from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // Main style file
-import 'react-date-range/dist/theme/default.css'; // Theme CSS file
-import '../css/Table.css';  // Custom CSS file
-import '../css/filter.css'; // Custom filter CSS file
+import '../css/Table.css';
+import '../css/filter.css'
 
-const Filterdata = ({ setFilters, serviceOwners, serviceNames, territories, operators, partnerNames, data }) => {
-  const [serviceOwner, setServiceOwner] = useState('');
-  const [filteredServiceNames, setFilteredServiceNames] = useState([]);
-  const [filteredTerritories, setFilteredTerritories] = useState([]);
-  const [filteredOperators, setFilteredOperators] = useState([]);
-  const [filteredPartnerNames, setFilteredPartnerNames] = useState([]);
-  const [serviceName, setServiceName] = useState('');
-  const [territory, setTerritory] = useState('');
-  const [operator, setOperator] = useState('');
-  const [partnerName, setPartnerName] = useState('');
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(),
-      endDate: new Date(),
-      key: 'selection'
-    }
-  ]);
+const Filterdata = ({ setFilters, serviceOwners, serviceNames, territories, operators, partnerNames,datefilter }) => {
+    const [serviceOwner, setServiceOwner] = useState('');
+    const [dateRange, setDateRange] = useState({ from: '', to: '' });
+    const [serviceName, setServiceName] = useState('');
+    const [territory, setTerritory] = useState('');
+    const [operator, setOperator] = useState('');
+    const [partnerName, setPartnerName] = useState('');
 
-  // Filter the other dropdowns based on selected service owner
-  const handleServiceOwnerChange = (owner) => {
-    setServiceOwner(owner);
+    const applyFilters = () => {
+        // Validate date range
+        if (new Date(dateRange.from) > new Date(dateRange.to)) {
+            alert('The "from" date cannot be later than the "to" date.');
+            return;
+        }
 
-    // Filter data based on the selected service owner
-    const filteredData = data.filter(item => item.serviceOwner === owner);
+        setFilters({
+            serviceOwner,
+            dateRange,
+            serviceName,
+            territory,
+            operator,
+            partnerName,
+        });
+    };
 
-    // Set the filtered values for each dropdown
-    setFilteredServiceNames([...new Set(filteredData.map(item => item.serviceName))]);
-    setFilteredTerritories([...new Set(filteredData.map(item => item.territory))]);
-    setFilteredOperators([...new Set(filteredData.map(item => item.operator))]);
-    setFilteredPartnerNames([...new Set(filteredData.map(item => item.partnerName))]);
+    const clearFilters = () => {
+        setServiceOwner('');
+        setDateRange({ from: '', to: '' });
+        setServiceName('');
+        setTerritory('');
+        setOperator('');
+        setPartnerName('');
+        setFilters({}); // Reset filters in the parent component
+    };
 
-    // Reset the other selected values
-    setServiceName('');
-    setTerritory('');
-    setOperator('');
-    setPartnerName('');
-  };
+    return (
+      <>
+       <div className='filter-obj'>
+        <div className='filter-container'>
+            {/* Service Owner Dropdown */}
+            <div>
+              
+                <select value={serviceOwner} onChange={(e) => setServiceOwner(e.target.value)}>
+                    <option value="">Select Service Owner</option>
+                    {serviceOwners.map((owner, idx) => (
+                        <option key={idx} value={owner}>
+                            {owner}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-  const applyFilters = () => {
-    setFilters({
-      serviceOwner,
-      dateRange,
-      serviceName,
-      territory,
-      operator,
-      partnerName,
-    });
-  };
+            {/* Date Range Input */}
+            <div className="date">
+             
+                <input
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                />
+                <input
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                />
+            </div>
 
-  const handleDateRangeChange = (ranges) => {
-    const { startDate, endDate } = ranges.selection;
-    setDateRange([ranges.selection]);
+            {/* Service Name Dropdown */}
+            <div>
+         
+                <select value={serviceName} onChange={(e) => setServiceName(e.target.value)}>
+                    <option value="">Select Service Name</option>
+                    {serviceNames.map((name, idx) => (
+                        <option key={idx} value={name}>
+                            {name}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      dateRange: {
-        from: startDate,
-        to: endDate
-      }
-    }));
-  };
+            {/* Territory Dropdown */}
+            <div>
+       
+                <select value={territory} onChange={(e) => setTerritory(e.target.value)}>
+                    <option value="">Select Territory</option>
+                    {territories.map((territory, idx) => (
+                        <option key={idx} value={territory}>
+                            {territory}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-  return (
-    <div className="filter-main">
-      <div className='filter-container'>
-        
-        {/* Service Owner Dropdown */}
-        <div className='input'>
-          <label>Service Owner</label>
-          <select value={serviceOwner} onChange={(e) => handleServiceOwnerChange(e.target.value)}>
-            <option value="">Select Service Owner</option>
-            {serviceOwners.map((owner, idx) => (
-              <option key={idx} value={owner}>
-                {owner}
-              </option>
-            ))}
-          </select>
-        </div>
+            {/* Operator Dropdown */}
+            <div>
+             
+                <select value={operator} onChange={(e) => setOperator(e.target.value)}>
+                    <option value="">Select Operator</option>
+                    {operators.map((operator, idx) => (
+                        <option key={idx} value={operator}>
+                            {operator}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-        {/* Date Range Picker */}
-        <div className='input'>
-          <label>Date Range</label>
-          <DateRangePicker
-            ranges={dateRange}
-            onChange={handleDateRangeChange}
-            moveRangeOnFirstSelection={false}
-            showSelectionPreview={true}
-            rangeColors={['#3b5998']} // Customize color
-            direction="horizontal"  // Show horizontal view for start and end date
-          />
-        </div>
-
-        {/* Service Name Dropdown */}
-        <div className='input'>
-          <label>Service Name</label>
-          <select value={serviceName} onChange={(e) => setServiceName(e.target.value)} disabled={!serviceOwner}>
-            <option value="">Select Service Name</option>
-            {filteredServiceNames.map((name, idx) => (
-              <option key={idx} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Territory Dropdown */}
-        <div className='input'>
-          <label>Territory</label>
-          <select value={territory} onChange={(e) => setTerritory(e.target.value)} disabled={!serviceOwner}>
-            <option value="">Select Territory</option>
-            {filteredTerritories.map((territory, idx) => (
-              <option key={idx} value={territory}>
-                {territory}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Operator Dropdown */}
-        <div className='input'>
-          <label>Operator</label>
-          <select value={operator} onChange={(e) => setOperator(e.target.value)} disabled={!serviceOwner}>
-            <option value="">Select Operator</option>
-            {filteredOperators.map((operator, idx) => (
-              <option key={idx} value={operator}>
-                {operator}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Partner Name Dropdown */}
-        <div className='input'>
-          <label>Partner Name</label>
-          <select value={partnerName} onChange={(e) => setPartnerName(e.target.value)} disabled={!serviceOwner}>
-            <option value="">Select Partner Name</option>
-            {filteredPartnerNames.map((partner, idx) => (
-              <option key={idx} value={partner}>
-                {partner}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <button className="filter-btn" onClick={applyFilters}>Apply Filters</button>
-    </div>
-  );
+            {/* Partner Name Dropdown */}
+            <div>
+          
+                <select value={partnerName} onChange={(e) => setPartnerName(e.target.value)}>
+                    <option value="">Select Partner Name</option>
+                    {partnerNames.map((partner, idx) => (
+                        <option key={idx} value={partner}>
+                            {partner}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            </div>
+            <div className="action-btn">
+            <button onClick={applyFilters}>Apply Filters</button>
+            <button onClick={clearFilters}>Clear Filters</button>
+            </div>
+            </div>
+        </>
+    );
 };
 
 export default Filterdata;

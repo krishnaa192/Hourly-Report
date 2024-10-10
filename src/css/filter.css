@@ -1,10 +1,45 @@
 .filter-container{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 
 
 }
 .input select{
      width: 250px;
      height: 40px;
+}
+
+select{
+    width: 230px ;
+    height: 35px;
+    margin-right: 80px;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+.date{
+    margin-right: 80px;
+    margin-top: 15px;
+}
+.date input{
+    margin-right: 10px;
+    width: 150px ;
+    height: 30px;
+}
+.action-btn{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.action-btn button{
+    border:  none;
+    padding: 10px;
+    background-color:#c41656;
+    margin-right: 20px;
+    color: white;
+}
+.filters-display ul li{
+    list-style: none;
+
 }

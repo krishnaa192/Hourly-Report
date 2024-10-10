@@ -1,19 +1,13 @@
 import React, { useMemo } from 'react';
 import '../css/Table.css';
 
-const TableComponent = ({ data,filters }) => {
-  // Grouping data by date
-  const groupedData = useMemo(() => {
-    return data.reduce((acc, item) => {
-      if (!acc[item.timestamp]) acc[item.timestamp] = [];
-      acc[item.timestamp].push(item);
-      return acc;
-    }, {});
-  }, [data]);
+const TableComponent = ({ data, filters }) => {
+
+
 
   // Function to calculate CR%
   const calculateCR = (pinVerSucCount, pinGenSucCount) => {
-    if (pinVerSucCount === 0) return '0%';
+    if (pinGenSucCount === 0) return '0%';
     return `${((pinVerSucCount / pinGenSucCount) * 100).toFixed(0)}%`;
   };
 
@@ -25,86 +19,119 @@ const TableComponent = ({ data,filters }) => {
     return `${day}-${month}-${year}`;
   };
 
-  const calculatetotalCr = (pgsCount, pvsCount) => {
-    return `${((pvsCount / pgsCount) * 100).toFixed(0)}% `;
-  };
-  const areFiltersApplied = Object.values(filters).some(filter => 
+  const groupedData = useMemo(() => {
+    return data.reduce((acc, item) => {
+      const dateOnly = item.timestamp.split(' ')[0]; 
+      if (!acc[dateOnly]) acc[dateOnly] = []; 
+      acc[dateOnly].push(item); 
+      return acc;
+    }, {});
+  }, [data]);
+  
+  const areFiltersApplied = Object.values(filters).some(filter =>
     filter !== '' && (typeof filter === 'object' ? filter.from || filter.to : true)
   );
 
- 
   if (!areFiltersApplied) {
-    return <p>Please apply filters to see the data.</p>; 
+    return <p>Please apply filters to see the data.</p>;
   }
-
 
   // Check if groupedData has entries
   if (Object.keys(groupedData).length === 0) {
-    return <p>No data available</p>; 
+    return <p>No data available</p>;
   }
 
   // Get unique hours (for header)
   const hours = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
-  if (Object.keys(groupedData).length === 0) {
-    return <p>No data available</p>; 
-  }
+  console.log(hours)
+
   return (
-    <table>
-      <thead>
-        {Object.keys(groupedData).map((date, idx) => (
-          <React.Fragment key={idx}>
-            <tr>
-             
-              <th>{formatDate(date)}</th> 
-              <th>Total CR</th>
-              {hours.map((hour, hourIdx) => (
-                <th key={hourIdx}>{hour}</th>
-              ))}
-            </tr>
+    <div>
+      {/* Display Filters */}
+      <div className="filters-display">
+        <h3>Applied Filters:</h3>
+        <ul>
+          <li>Service Owner: {filters.serviceOwner || 'All'}</li>
+          <li>Date Range: {filters.dateRange.from} - {filters.dateRange.to}</li>
+          <li>Service Name: {filters.serviceName || 'All'}</li>
+          <li>Territory: {filters.territory || 'All'}</li>
+          <li>Operator: {filters.operator || 'All'}</li>
+          <li>Partner Name: {filters.partnerName || 'All'}</li>
+        </ul>
+      </div>
 
-            {/* CR% Row */}
-            <tr>
-              <td>CR%</td> 
-              <td>60%</td> 
-              {hours.map((hour) => {
-                const item = groupedData[date].find((d) => `${d.hrs + 1}` === hour);
-                return (
-                  <td key={hour}>
-                    {item ? calculateCR(item.pinGenSucCount, item.pinGenReqCount) : 'NA'}
-                  </td>
-                );
-              })}
-            </tr>
+      <table>
+        <thead>
+          {Object.keys(groupedData).map((date, idx) => (
+            <React.Fragment key={idx}>
+              <tr>
+                <th>{formatDate(date)}</th>
+                <th >Total CR</th>
 
-            {/* Pin Gen Row */}
-            <tr>
-              <td>Pin Gen</td> 
-              <td>220</td> 
-              {hours.map((hour) => {
-                const item = groupedData[date].find((d) => `${d.hrs}-${d.hrs + 1}` === hour);
-                return <td key={hour}>{item ? item.pinGenReqCount : 0}</td>;
-              })}
-            </tr>
+                {hours.map((hour, hourIdx) => (
+                  <th key={hourIdx}>{hour}</th>
+                ))}
+              </tr>
 
-            {/* Pin Ver Row (Last Row) */}
-            <tr className="last-row">
-              <td>Pin Ver</td> 
-              <td>120</td>
-              {hours.map((hour) => {
-                const item = groupedData[date].find((d) => `${d.hrs}-${d.hrs + 1}` === hour);
-                return <td key={hour}>{item ? item.pinVerReqCount : 0}</td>;
-              })}
-            </tr>
+              {/* CR% Row */}
+              <tr>
+                <td className="static">CR%</td>
+                <td>
+                  {calculateCR(
+                    groupedData[date].reduce((sum, item) => sum + item.pinVerSucCount, 0),
+                    groupedData[date].reduce((sum, item) => sum + item.pinGenSucCount, 0)
+                  )}
+                </td>
+                {hours.map((hour) => {
+                  const item = groupedData[date].find((d) => `${d.hrs + 1}` === hour);
+                  return (
+                    <td key={hour}>
+                      
+                      {item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA'}
+                    </td>
+                  );
+                })}
+              </tr>
 
-            {/* Gap between date groups */}
-            <tr>
-              <td colSpan={2}></td>
-              <td colSpan={hours.length}></td>
-            </tr>
-          </React.Fragment>
-        ))}
-      </thead>
-    </table>
+              {/* Pin Gen Row */}
+              <tr>
+                <td className="static">Pin Gen</td>
+                <td>
+                  {groupedData[date].reduce((sum, item) => sum + item.pinGenSucCount, 0)}
+                </td>
+                {hours.map((hour) => {
+  const item = groupedData[date].find((d) => String(d.hrs + 1) === hour);
+  return (
+    <td key={hour}>
+      {item ? item.pinGenSucCount : 0}
+    </td>
+  );
+})}
+
+              </tr>
+
+              {/* Pin Ver Row */}
+              <tr className="last-row">
+                <td className="static">Pin Ver</td>
+                <td>
+                  {groupedData[date].reduce((sum, item) => sum + item.pinVerSucCount, 0)}
+                </td>
+                {hours.map((hour) => {
+                  const item = groupedData[date].find((d) => `${d.hrs + 1}` === hour);
+                  return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
+                })}
+              </tr>
+
+              {/* Gap between date groups */}
+              <tr>
+                <td colSpan={2}></td>
+                <td colSpan={hours.length}></td>
+              </tr>
+            </React.Fragment>
+          ))}
+        </thead>
+      </table>
+    </div>
   );
 };
 

@@ -261,6 +261,13 @@ table {
   
   thead th {
     font-weight: bold;
+    background-color: #8f2b4f;
+    color: white;
+  }
+  .static{
+    font-weight: bold;
+    background-color: #8f2b4f;
+    color: white;
   }
   
   tbody td {
@@ -314,10 +321,13 @@ table {
   
 
   /* filter  table */
-  .filter-container{
+  .filter-obj{
     margin-bottom: 10px;
     border: 2px solid black;
     padding: 5px;
+    height: 200px;
+    padding: 15px;
+
   }
 .gap{
     width: 20px;

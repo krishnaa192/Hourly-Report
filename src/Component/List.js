@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import Filterdata from './Filter'; 
-import TableComponent from './Table'; 
-
-
+import Filterdata from './Filter';
+import TableComponent from './Table';
 
 const Hourlydata = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [loading,setLoading]=useState(true);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     serviceOwner: '',
     dateRange: { from: '', to: '' },
@@ -23,7 +21,7 @@ const Hourlydata = () => {
       .then((response) => response.json())
       .then((result) => {
         setData(result); // Assuming result is an array
-        setLoading(false)
+        setLoading(false);
       })
       .catch((error) => console.error('Error fetching data:', error));
   }, []);
@@ -31,58 +29,62 @@ const Hourlydata = () => {
   useEffect(() => {
     applyFilters();
   }, [filters, data]);
-  console.log(data)
-// Apply filters logic
-const applyFilters = () => {
-  let filtered = data || [];
 
-  // Filter by Service Owner
-  if (filters.serviceOwner) {
-      filtered = filtered.filter(item => item.service_owner === filters.serviceOwner);
-  }
+  console.log(data);
 
-  // Filter by Date Range
-  if (filters.dateRange.from && filters.dateRange.to) {
+  // Apply filters logic
+  const applyFilters = () => {
+    let filtered = data || [];
+
+    // Filter by Service Owner
+    if (filters.serviceOwner) {
+      filtered = filtered.filter((item) => item.service_owner === filters.serviceOwner);
+    }
+
+    // Filter by Date Range
+    if (filters.dateRange.from && filters.dateRange.to) {
       const fromDate = new Date(filters.dateRange.from);
       const toDate = new Date(filters.dateRange.to);
 
-      filtered = filtered.filter(item => {
-        
-          const itemDate = new Date(item.timestamp.split(' ')[0]); 
-          return itemDate >= fromDate && itemDate <= toDate;
+      filtered = filtered.filter((item) => {
+        const itemDate = new Date(item.timestamp.split(' ')[0]);
+        return itemDate >= fromDate && itemDate <= toDate;
       });
-  }
+    }
 
-  // Filter by Service Name
-  if (filters.serviceName) {
-      filtered = filtered.filter(item => item.serviceName === filters.serviceName);
-  }
+    // Filter by Service Name
+    if (filters.serviceName) {
+      filtered = filtered.filter((item) => item.serviceName === filters.serviceName);
+    }
 
-  // Filter by Territory
-  if (filters.territory) {
-      filtered = filtered.filter(item => item.territory === filters.territory);
-  }
+    // Filter by Territory
+    if (filters.territory) {
+      filtered = filtered.filter((item) => item.territory === filters.territory);
+    }
 
-  // Filter by Operator
-  if (filters.operator) {
-      filtered = filtered.filter(item => item.operatorname === filters.operator);
-  }
+    // Filter by Operator
+    if (filters.operator) {
+      filtered = filtered.filter((item) => item.operatorname === filters.operator);
+    }
 
-  // Filter by Partner Name
-  if (filters.partnerName) {
-      filtered = filtered.filter(item => item.partnerName === filters.partnerName);
-  }
+    // Filter by Partner Name
+    if (filters.partnerName) {
+      filtered = filtered.filter((item) => item.partnerName === filters.partnerName);
+    }
 
-  setFilteredData(filtered);
-};
+    setFilteredData(filtered);
+  };
 
-
-
-
-
-  // Helper function to extract unique values for dropdowns
+  // Helper function to extract unique values for dropdowns based on current filters
   const getUniqueValues = (key) => {
-    return [...new Set(data.map((item) => item[key]))];
+    let filteredForOptions = data;
+
+    // If serviceOwner is selected, filter options based on serviceOwner
+    if (filters.serviceOwner) {
+      filteredForOptions = data.filter((item) => item.service_owner === filters.serviceOwner);
+    }
+
+    return [...new Set(filteredForOptions.map((item) => item[key]))];
   };
 
   const serviceOwners = getUniqueValues('service_owner');
@@ -90,16 +92,13 @@ const applyFilters = () => {
   const territories = getUniqueValues('territory');
   const operators = getUniqueValues('operatorname');
   const partnerNames = getUniqueValues('partnerName');
- 
 
-  if(loading){
-    return <div>loading</div>
+  if (loading) {
+    return <div>Loading...</div>;
   }
- 
 
   return (
     <div>
-      <h2>Hourly Data</h2>
       <Filterdata
         setFilters={setFilters}
         serviceOwners={serviceOwners}
@@ -107,7 +106,6 @@ const applyFilters = () => {
         territories={territories}
         operators={operators}
         partnerNames={partnerNames}
-
       />
       <TableComponent data={filteredData} filters={filters} /> {/* Ensure filters are passed */}
     </div>

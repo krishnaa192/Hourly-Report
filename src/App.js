@@ -1,10 +1,11 @@
 import React from 'react';
 import Hourlydata from './Component/List';
+import  './App.css';
 
 
 const App = () => {
   return (
-    <div> 
+    <div className='hourlydata'> 
       <Hourlydata />
     </div>
   );

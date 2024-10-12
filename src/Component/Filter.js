@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import '../css/Table.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../css/filter.css'
+import {  faTimesCircle } from '@fortawesome/free-solid-svg-icons'; // Importing icons
 
 const Filterdata = ({ setFilters, serviceOwners, serviceNames, territories, operators, partnerNames,datefilter }) => {
     const [serviceOwner, setServiceOwner] = useState('');
@@ -123,7 +125,9 @@ const Filterdata = ({ setFilters, serviceOwners, serviceNames, territories, oper
             </div>
             <div className="action-btn">
             <button onClick={applyFilters}>Apply Filters</button>
-            <button onClick={clearFilters}>Clear Filters</button>
+            <button className="clear-filters-btn" onClick={clearFilters}>
+            <FontAwesomeIcon icon={faTimesCircle} /> 
+          </button>
             </div>
             </div>
         </>

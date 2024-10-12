@@ -318,17 +318,120 @@ table {
   tr:last-child {
     margin-bottom: 10px; /* Create spacing between the last row of each date group */
   }
+  .filters-display button{
+    padding: 5PX;
+   height: 39px;
+   background-color: #a6add1;
+
+   border: none;
   
+   border-radius: 10px;
+  }
+  .actions{
+    margin: auto;
+  }
 
   /* filter  table */
   .filter-obj{
     margin-bottom: 10px;
-    border: 2px solid black;
     padding: 5px;
-    height: 200px;
-    padding: 15px;
+    height: 180px;
+   
 
   }
 .gap{
     width: 20px;
 }
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 1rem;
+    background-color: #f8f9fa;
+  }
+  
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    margin: 1rem 0;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .styled-table th, .styled-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    font-weight: normal;
+  }
+  
+  .styled-table th {
+    background-color: #a6add1;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .styled-table td.static {
+    font-weight: bold;
+  }
+  tr .head{
+    background-color: #fff;
+  }
+  .header-row {
+    background-color: #3f51b5;
+    color: white;
+  }
+  
+  .cr-row {
+    background-color: #eee;
+  }
+  .content-head{
+    background-color: #fff;
+  }
+  .cr-row td {
+    color: green; /* Change as per your design */
+    font-weight: bold;
+  }
+  .filters-display h3{
+    margin-right: -124px;
+    padding-top: 2px;
+  }
+  .cr-row td.fail {
+    color: red; /* Highlight failure CR */
+  }
+  
+  .last-row {
+    border-bottom: 2px solid #3f51b5;
+  }
+  
+  .filters-display {
+        box-shadow: #3c40434d 0 1px 2px, #3c404326 0 2px 6px 2px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-evenly;
+    width: 100vw;
+  }
+  
+  .filters-display ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .filters-display li {
+    margin: 0.5rem 0;
+    font-weight: bold;
+  }
+  
+  .gap-row td {
+    height: 10px;
+    background-color: #fafafa;
+  }
+  .val-head{
+    display: flex;
+    flex-direction: row;
+
+  }
+  .val-head ul li{
+    list-style: none;
+  }

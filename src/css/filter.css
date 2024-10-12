@@ -1,9 +1,18 @@
+body{
+    background-color: #fff
+}
+
 .filter-container{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    margin-bottom: 25px;
+   
 
 
+}
+.filter-obj{
+    background-color: #fff !important ;
 }
 .input select{
      width: 250px;
@@ -35,11 +44,12 @@ select{
 .action-btn button{
     border:  none;
     padding: 10px;
-    background-color:#c41656;
+    background-color:#a6add1;
     margin-right: 20px;
     color: white;
 }
 .filters-display ul li{
     list-style: none;
+    margin-left: 23px;
 
 }

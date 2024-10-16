@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import Filterdata from './Filter';
-import TableComponent from './Table';
+import Filterdata from './Filter'; // Assuming this is your Tab 1 filter component
+import ServiceOwner from './Service_owner'; // Assuming this is your Tab 1 data display component
+import '../css/hourlydata.css'; // Styles for tabs
+import TrafficFilterdata from './TrafficFilter'; // Your Tab 2 filter component
+import TrafficDataComponent from './Traffic'; // Your Tab 2 data display component
 
 const Hourlydata = () => {
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [data, setData] = useState([]); // Raw data from the API
+  const [filteredDataTab1, setFilteredDataTab1] = useState([]); // For Tab 1
+  const [filteredDataTab2, setFilteredDataTab2] = useState([]); // For Tab 2
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
+
+  const [filtersTab1, setFiltersTab1] = useState({
     serviceOwner: '',
     dateRange: { from: '', to: '' },
     serviceName: '',
@@ -15,6 +20,16 @@ const Hourlydata = () => {
     partnerName: '',
   });
 
+  const [filtersTab2, setFiltersTab2] = useState({
+    partnerName: '',
+    dateRange: { from: '', to: '' },
+    serviceName: '',
+    territory: '',
+    operator: '',
+  });
+
+  const [activeTab, setActiveTab] = useState('tab1'); // State to track active tab
+
   useEffect(() => {
     // Fetch data from API
     fetch('https://wap.matrixads.in/mglobopay/getHourlyInappReport')
@@ -22,76 +37,111 @@ const Hourlydata = () => {
       .then((result) => {
         setData(result); // Assuming result is an array
         setLoading(false);
+        applyFilters(result); // Apply filters for the active tab when data is fetched
       })
       .catch((error) => console.error('Error fetching data:', error));
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [filters, data]);
-
-  console.log(data);
-
-  // Apply filters logic
-  const applyFilters = () => {
-    let filtered = data || [];
-
-    // Filter by Service Owner
-    if (filters.serviceOwner) {
-      filtered = filtered.filter((item) => item.service_owner === filters.serviceOwner);
+  // Apply filters for the active tab
+  const applyFilters = (dataToFilter) => {
+    if (activeTab === 'tab1') {
+      applyFiltersTab1(dataToFilter);
+    } else if (activeTab === 'tab2') {
+      applyFiltersTab2(dataToFilter);
     }
+  };
 
-    // Filter by Date Range
-    if (filters.dateRange.from && filters.dateRange.to) {
-      const fromDate = new Date(filters.dateRange.from);
-      const toDate = new Date(filters.dateRange.to);
-
+  // Apply filters for Tab 1
+  const applyFiltersTab1 = (dataToFilter) => {
+    let filtered = dataToFilter || [];
+    // Filtering logic for Tab 1
+    if (filtersTab1.serviceOwner) {
+      filtered = filtered.filter((item) => item.service_owner === filtersTab1.serviceOwner);
+    }
+    if (filtersTab1.dateRange?.from && filtersTab1.dateRange?.to) {
+      const fromDate = new Date(filtersTab1.dateRange.from);
+      const toDate = new Date(filtersTab1.dateRange.to);
       filtered = filtered.filter((item) => {
         const itemDate = new Date(item.timestamp.split(' ')[0]);
         return itemDate >= fromDate && itemDate <= toDate;
       });
     }
-
-    // Filter by Service Name
-    if (filters.serviceName) {
-      filtered = filtered.filter((item) => item.serviceName === filters.serviceName);
+    if (filtersTab1.serviceName) {
+      filtered = filtered.filter((item) => item.serviceName === filtersTab1.serviceName);
     }
-
-    // Filter by Territory
-    if (filters.territory) {
-      filtered = filtered.filter((item) => item.territory === filters.territory);
+    if (filtersTab1.territory) {
+      filtered = filtered.filter((item) => item.territory === filtersTab1.territory);
     }
-
-    // Filter by Operator
-    if (filters.operator) {
-      filtered = filtered.filter((item) => item.operatorname === filters.operator);
+    if (filtersTab1.operator) {
+      filtered = filtered.filter((item) => item.operatorname === filtersTab1.operator);
     }
-
-    // Filter by Partner Name
-    if (filters.partnerName) {
-      filtered = filtered.filter((item) => item.partnerName === filters.partnerName);
+    if (filtersTab1.partnerName) {
+      filtered = filtered.filter((item) => item.partnerName === filtersTab1.partnerName);
     }
-
-    setFilteredData(filtered);
+    setFilteredDataTab1(filtered);
   };
 
-  // Helper function to extract unique values for dropdowns based on current filters
-  const getUniqueValues = (key) => {
-    let filteredForOptions = data;
-
-    // If serviceOwner is selected, filter options based on serviceOwner
-    if (filters.serviceOwner) {
-      filteredForOptions = data.filter((item) => item.service_owner === filters.serviceOwner);
+  // Apply filters for Tab 2
+  const applyFiltersTab2 = (dataToFilter) => {
+    let filtered = dataToFilter || [];
+    // Filtering logic for Tab 2
+    if (filtersTab2.partnerName) {
+      filtered = filtered.filter((item) => item.partnerName === filtersTab2.partnerName);
+    }
+    if (filtersTab2.serviceName) {
+      filtered = filtered.filter((item) => item.serviceName === filtersTab2.serviceName);
+    }
+    if (filtersTab2.territory) {
+      filtered = filtered.filter((item) => item.territory === filtersTab2.territory);
+    }
+    if (filtersTab2.operator) {
+      filtered = filtered.filter((item) => item.operatorname === filtersTab2.operator);
     }
 
+    setFilteredDataTab2(filtered);
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);  // Let useEffect handle the filter application
+  };
+
+  useEffect(() => {
+    // Apply filters based on the current tab
+    if (activeTab === 'tab1') {
+      applyFiltersTab1(data); // Apply Tab 1 filters
+    } else if (activeTab === 'tab2') {
+      applyFiltersTab2(data); // Apply Tab 2 filters
+    }
+  }, [activeTab, filtersTab1, filtersTab2, data]);
+
+  // Separate filter dropdown options logic for each tab
+  const getUniqueValues = (key, tab) => {
+    let filteredForOptions = data;
+    if (tab === 'tab1') {
+      // Filtering for options based on Tab 1 filters
+      if (filtersTab1.serviceOwner) {
+        filteredForOptions = data.filter((item) => item.service_owner === filtersTab1.serviceOwner);
+      }
+    } else if (tab === 'tab2') {
+      // Filtering for options based on Tab 2 filters
+      if (filtersTab2.partnerName) {
+        filteredForOptions = data.filter((item) => item.partnerName === filtersTab2.partnerName);
+      }
+    }
     return [...new Set(filteredForOptions.map((item) => item[key]))];
   };
 
-  const serviceOwners = getUniqueValues('service_owner');
-  const serviceNames = getUniqueValues('serviceName');
-  const territories = getUniqueValues('territory');
-  const operators = getUniqueValues('operatorname');
-  const partnerNames = getUniqueValues('partnerName');
+  // Separate dropdown values for each tab
+  const serviceOwners = getUniqueValues('service_owner', 'tab1');
+  const serviceNamesTab1 = getUniqueValues('serviceName', 'tab1');
+  const territoriesTab1 = getUniqueValues('territory', 'tab1');
+  const operatorsTab1 = getUniqueValues('operatorname', 'tab1');
+  const partnerNamesTab1 = getUniqueValues('partnerName', 'tab1');
+
+  const serviceNamesTab2 = getUniqueValues('serviceName', 'tab2');
+  const territoriesTab2 = getUniqueValues('territory', 'tab2');
+  const operatorsTab2 = getUniqueValues('operatorname', 'tab2');
+  const partnerNamesTab2 = getUniqueValues('partnerName', 'tab2');
 
   if (loading) {
     return <div>Loading...</div>;
@@ -99,15 +149,50 @@ const Hourlydata = () => {
 
   return (
     <div>
-      <Filterdata
-        setFilters={setFilters}
-        serviceOwners={serviceOwners}
-        serviceNames={serviceNames}
-        territories={territories}
-        operators={operators}
-        partnerNames={partnerNames}
-      />
-      <TableComponent data={filteredData} filters={filters} /> {/* Ensure filters are passed */}
+      <div className="tab-container">
+        <button
+          className={`tab ${activeTab === 'tab1' ? 'active' : ''}`}
+          onClick={() => handleTabChange('tab1')}
+        >
+          Service Partner
+        </button>
+        <button
+          className={`tab ${activeTab === 'tab2' ? 'active' : ''}`}
+          onClick={() => handleTabChange('tab2')}
+        >
+          Traffic Partner
+        </button>
+      </div>
+
+      {activeTab === 'tab1' && (
+        <>
+          <Filterdata
+            setFilters={setFiltersTab1}
+            serviceOwners={serviceOwners}
+            serviceNames={serviceNamesTab1}
+            territories={territoriesTab1}
+            operators={operatorsTab1}
+            partnerNames={partnerNamesTab1}
+            data={data} // Pass the fetched data to filter
+            applyFilters={() => applyFilters(data)} // Ensure filters are applied on change
+          />
+          <ServiceOwner data={filteredDataTab1} filters={filtersTab1} />
+        </>
+      )}
+
+      {activeTab === 'tab2' && (
+        <>
+          <TrafficFilterdata
+            setFilters={setFiltersTab2}
+            partnerNames={partnerNamesTab2}
+            serviceNames={serviceNamesTab2}
+            territories={territoriesTab2}
+            operators={operatorsTab2}
+            applyFilters={() => applyFilters(data)} // Ensure filters are applied on change
+          />
+          <TrafficDataComponent data={filteredDataTab2} filters={filtersTab2} />
+        </>
+      )}
     </div>
   );
 };

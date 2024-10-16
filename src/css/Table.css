@@ -46,6 +46,16 @@
     margin-bottom: 0 !important;
 }
 
+.export-btn{
+  background-color: #FFC107 !important;
+  border: none;
+  padding: 5px;
+}
+
+.section-header{
+  display: flex;
+  justify-content: space-between;
+}
 .select-date-header {
     display: flex;
     align-items: center;

@@ -2,9 +2,26 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import '../css/Table.css'; // assuming the CSS is linked here
+import GraphModal from './GraphData'; // Make sure to import your GraphModal
 
 const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedServiceID, setSelectedServiceID] = useState(null); // Set to null initially
+  const [selectedDate, setSelectedDate] = useState(null); // Set to null initially
+  const [graphData, setGraphData] = useState(null); // State for graph data
+
+  const openModal = (serviceID, date, data) => {
+    setSelectedServiceID(serviceID); // Update with dynamic service ID
+    setSelectedDate(date); // Update with dynamic date
+    setGraphData(data); // Set graph data based on the selected row
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setGraphData(null); // Reset graph data when closing the modal
+  };
 
   // Function to calculate CR%
   const calculateCR = useMemo(() => (pinVerSucCount, pinGenSucCount) => {
@@ -25,7 +42,6 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   useEffect(() => {
     if (filters) {
       setLoading(true);
-      // Simulate loading delay, replace with actual API call if necessary
       const timer = setTimeout(() => {
         setLoading(false);
       }, 1000); // 1 second delay for demonstration
@@ -116,7 +132,7 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
                   <React.Fragment key={`${date}-${serviceId}`}>
                     <tr className='head'>
                       <th className='content-head' colSpan={hours.length + 2}>
-                        Service ID: {serviceId} | Service Name: {serviceName || 'N/A'} | Territory: {territory || 'N/A'} | Operator: {operatorname || 'N/A'} | Partner Name: {partnerName || 'N/A'} | Service Owner: {service_owner || 'N/A'}
+                        Service ID: {serviceId} | Service Name: {serviceName || 'N/A'} | Territory: {territory || 'N/A'} | Operator: {operatorname || 'N/A'} | Partner Name: {partnerName || 'N/A'} | Service Owner: {service_owner || 'N/A'} |  <button onClick={() => openModal(serviceId, date, flattenedData)}>Open Graph Modal</button>
                       </th>
                     </tr>
 
@@ -173,6 +189,14 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
           </table>
         </div>
       ))}
+      {/* Render the modal */}
+      <GraphModal 
+        serviceID={selectedServiceID} 
+        selectedDate={selectedDate} 
+        graphData={graphData} // Pass the graph data here
+        isOpen={modalIsOpen} 
+        onRequestClose={closeModal} 
+      />
     </div>
   );
 };

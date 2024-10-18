@@ -53,4 +53,88 @@ select{
     margin-left: 23px;
 
 }
-
+/* Overall container styling */
+.filter-obj {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Styling for the dropdown containers */
+  .filter-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Individual dropdown fields */
+  .filter-container div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Labels for input fields */
+  .filter-container label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  /* Dropdown and input fields */
+  .filter-container select,
+  .filter-container input {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+  }
+  
+  .filter-container select:focus,
+  .filter-container input:focus {
+    border-color: #007bff;
+  }
+  
+  /* Action buttons container */
+  .action-btn {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  /* Apply Filters button */
+  .action-btn button {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .action-btn button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Clear Filters button */
+  .clear-filters-btn {
+    background-color: #dc3545;
+  }
+  
+  .clear-filters-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* FontAwesome Icon Styling */
+  .clear-filters-btn .faTimesCircle {
+    margin-right: 5px;
+  }
+  

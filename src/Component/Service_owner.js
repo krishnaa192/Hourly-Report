@@ -2,33 +2,34 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import '../css/Table.css'; // assuming the CSS is linked here
-import GraphModal from './GraphData'; // Make sure to import your GraphModal
+import GraphModal from './GraphData'; // Import your GraphModal
 
 const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedServiceID, setSelectedServiceID] = useState(null); // Set to null initially
-  const [selectedDate, setSelectedDate] = useState(null); // Set to null initially
-  const [graphData, setGraphData] = useState(null); // State for graph data
+  const [selectedServiceID, setSelectedServiceID] = useState(null); 
+  const [selectedDate, setSelectedDate] = useState(null); 
+  const [graphData, setGraphData] = useState(null); 
 
   const openModal = (serviceID, date, data) => {
-    setSelectedServiceID(serviceID); // Update with dynamic service ID
-    setSelectedDate(date); // Update with dynamic date
-    setGraphData(data); // Set graph data based on the selected row
+    setSelectedServiceID(serviceID);
+    setSelectedDate(date);
+    setGraphData(data);
     setModalIsOpen(true);
   };
 
   const closeModal = () => {
     setModalIsOpen(false);
-    setGraphData(null); // Reset graph data when closing the modal
+    setGraphData(null);
   };
 
-  // Function to calculate CR%
+  // CR% Calculation
   const calculateCR = useMemo(() => (pinVerSucCount, pinGenSucCount) => {
     if (pinGenSucCount === 0) return '0%';
     return `${((pinVerSucCount / pinGenSucCount) * 100).toFixed(0)}%`;
   }, []);
 
+  // Date Formatter
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     date.setDate(date.getDate() - 1); // Subtract one day
@@ -38,19 +39,17 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
     return `${day}-${month}-${year}`;
   };
 
-  // Use useEffect to simulate data loading
+  // Loading Simulation
   useEffect(() => {
     if (filters) {
       setLoading(true);
       const timer = setTimeout(() => {
         setLoading(false);
       }, 1000); // 1 second delay for demonstration
-
       return () => clearTimeout(timer);
     }
   }, [filters]);
 
-  // Memoized filtered data
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
     return data.filter(item => {
@@ -66,7 +65,6 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
     });
   }, [data, filters]);
 
-  // Memoized grouped data
   const groupedData = useMemo(() => {
     if (!filteredData || filteredData.length === 0) return {};
     return filteredData.reduce((acc, item) => {
@@ -84,22 +82,13 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
 
   const hours = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
 
-  // Check if filters are applied
-  const areFiltersApplied = filters && (
-    filters.serviceOwner || filters.dateRange.from || filters.serviceName ||
-    filters.territory || filters.operator || filters.partnerName
-  );
-
-  // If no filters are applied, display a message
-  if (!areFiltersApplied) {
+  if (!filters.serviceOwner) {
     return <p>Please apply filters to see the data.</p>;
   }
 
-  // Show loading indicator if data is being loaded
   if (loading) {
     return <div className="loading-spinner">Loading data...</div>;
   }
-
   return (
     <div className="table-container">
       <div className="filters-display">
@@ -193,9 +182,10 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
       <GraphModal 
         serviceID={selectedServiceID} 
         selectedDate={selectedDate} 
-        graphData={graphData} // Pass the graph data here
+        initialData={graphData} 
         isOpen={modalIsOpen} 
         onRequestClose={closeModal} 
+        
       />
     </div>
   );

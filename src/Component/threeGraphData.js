@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import LinearChart from './Single'; // Assuming your D3 chart is in this file
+import ThreeLinearChart from './TrafficGraph' // Assuming your D3 chart is in this file
 
 // Custom date formatting function
 const formatDate = (dateString) => {
@@ -12,7 +12,7 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialData }) => {
+const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initialData }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +26,11 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
         // Check if initialData is an array, otherwise set an empty array as fallback
         const result = Array.isArray(initialData) ? initialData : [];
 
+        // Log the initialData and result for debugging
+        console.log('Initial Data:', initialData);
+        console.log('Processed Result:', result);
+
+        // Initialize accumulator for grouping data
         const acc = {};
 
         // Process the result
@@ -107,7 +112,7 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
           <h2>Service ID: {serviceID}</h2>
           <h3>Date: {formatDate(selectedDate)}</h3>
           {data.length > 0 ? (
-            <LinearChart
+            <ThreeLinearChart
               data={data}
               title={`Graph for Service ID ${serviceID} on ${formatDate(selectedDate)}`}
             />
@@ -121,4 +126,4 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
   );
 };
 
-export default GraphModal;
+export default ThreeDataGraph;

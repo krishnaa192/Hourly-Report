@@ -3,7 +3,8 @@ import Filterdata from './Filter'; // Assuming this is your Tab 1 filter compone
 import ServiceOwner from './Service_owner'; // Assuming this is your Tab 1 data display component
 import '../css/hourlydata.css'; // Styles for tabs
 import TrafficFilterdata from './TrafficFilter'; // Your Tab 2 filter component
-import TrafficDataComponent from './Traffic'; // Your Tab 2 data display component
+import TrafficDataComponent from './Traffic'; //
+import { fetchHourlyInappReport } from '../Utils'
 
 const Hourlydata = () => {
   const [data, setData] = useState([]); // Raw data from the API
@@ -31,15 +32,19 @@ const Hourlydata = () => {
   const [activeTab, setActiveTab] = useState('tab1'); // State to track active tab
 
   useEffect(() => {
-    // Fetch data from API
-    fetch('https://wap.matrixads.in/mglobopay/getHourlyInappReport')
-      .then((response) => response.json())
-      .then((result) => {
-        setData(result); // Assuming result is an array
+    const fetchData = async () => {
+      try {
+        const result = await fetchHourlyInappReport(); // Use the centralized API call
+        setData(result);
         setLoading(false);
         applyFilters(result); // Apply filters for the active tab when data is fetched
-      })
-      .catch((error) => console.error('Error fetching data:', error));
+      } catch (error) {
+        setLoading(false);
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Apply filters for the active tab

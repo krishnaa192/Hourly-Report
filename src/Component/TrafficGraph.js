@@ -10,7 +10,7 @@ const ThreeLinearChart = ({ data, title }) => {
     const tooltip = d3.select(tooltipRef.current);
     const width = 800;
     const height = 400;
-    const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+    const margin = { top: 20, right: 50, bottom: 50, left: 50 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -45,10 +45,14 @@ const ThreeLinearChart = ({ data, title }) => {
       .domain([0, d3.max(filteredData, d => Math.max(d.pinGenSucCount, d.pinVerSucCount))])
       .range([innerHeight, 0]);
 
-    // Clear previous axes and grid
+    // Clear previous axes, grid, lines, and area
     g.selectAll('.x-axis').remove();
     g.selectAll('.y-axis').remove();
+    g.selectAll('.y-axis-count').remove(); // Clear old count axis
     g.selectAll('.grid').remove();
+    g.selectAll('.line').remove();
+    g.selectAll('.area').remove();
+    g.selectAll('.label').remove(); // Clear old labels
 
     // Add X axis
     g.append('g')
@@ -57,15 +61,34 @@ const ThreeLinearChart = ({ data, title }) => {
       .call(d3.axisBottom(x).ticks(24)); // 24 ticks for each hour
 
     // Add Y axis for CR
-    g.append('g')
+    const yAxisCR = g.append('g')
       .attr('class', 'y-axis')
       .call(d3.axisLeft(y));
 
     // Add Y axis for counts (pinGenSucCount and pinVerSucCount) on the right
-    g.append('g')
+    const yAxisCount = g.append('g')
       .attr('class', 'y-axis-count')
       .attr('transform', `translate(${innerWidth}, 0)`)
       .call(d3.axisRight(yCount));
+
+    // Label the Y-axes
+    yAxisCR.append('text')
+      .attr('class', 'y-axis-label')
+      .attr('x', -margin.left)
+      .attr('y', 6)
+      .attr('dy', '.71em')
+      .attr('text-anchor', 'end')
+      .text('CR (%)')
+      .attr('fill', '#1f77b4');
+
+    yAxisCount.append('text')
+      .attr('class', 'y-axis-label')
+      .attr('x', margin.right)
+      .attr('y', -6)
+      .attr('dy', '.71em')
+      .attr('text-anchor', 'start')
+      .text('PinGenSucCount & PinVerSucCount')
+      .attr('fill', '#ff7f0e');
 
     // Add horizontal grid lines
     const yTicks = y.ticks();
@@ -81,10 +104,6 @@ const ThreeLinearChart = ({ data, title }) => {
       .attr('y2', d => y(d))
       .attr('stroke', '#ccc')
       .attr('stroke-dasharray', '2,2');
-
-    // Clear previous lines and area
-    g.selectAll('.line').remove();
-    g.selectAll('.area').remove();
 
     // Define line generator for CR
     const lineGeneratorCR = d3.line()
@@ -127,46 +146,40 @@ const ThreeLinearChart = ({ data, title }) => {
       .attr('stroke-width', 2)
       .attr('d', lineGeneratorPinVer);
 
-    // Clear previous dots
-    g.selectAll('.dot').remove();
+    // Add tooltip handling logic for each line
+    const handleMouseOver = (event, d) => {
+      tooltip.style('opacity', 1)
+        .html(`Hour: ${d.hour}<br>CR: ${d.cr}<br>PinGenSucCount: ${d.pinGenSucCount}<br>PinVerSucCount: ${d.pinVerSucCount}`)
+        .style('left', `${event.pageX + 10}px`)
+        .style('top', `${event.pageY - 20}px`);
+    };
 
-    // Add dots for interaction
-    g.selectAll('.dot')
-      .data(filteredData)
-      .enter().append('circle')
-      .attr('class', 'dot')
-      .attr('cx', d => x(d.hour))
-      .attr('cy', d => y(d.cr))
-      .attr('r', 5)
-      .attr('fill', 'black')
-      .on('mouseover', (event, d) => {
-        tooltip
-          .style('opacity', 1)
-          .html(`
-          Hour: ${d.hour}:00<br/>
-          CR: ${d.cr.toFixed(2)}%<br/>
-          PinGenSuc: ${d.pinGenSucCount}<br/>
-          PinVerSuc: ${d.pinVerSucCount}
-          `);
-      })
-      .on('mousemove', (event) => {
-        tooltip
-          .style('left', `${event.pageX + 10}px`)
-          .style('top', `${event.pageY - 28}px`);
-      })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-      });
+    const handleMouseOut = () => {
+      tooltip.style('opacity', 0);
+    };
 
+    // Add dots for each data point and handle tooltip interaction
+    ['cr', 'pin-gen', 'pin-ver'].forEach((lineClass, idx) => {
+      g.selectAll(`.dot-${lineClass}`)
+        .data(filteredData)
+        .enter()
+        .append('circle')
+        .attr('class', `dot dot-${lineClass}`)
+        .attr('cx', d => x(d.hour))
+        .attr('cy', d => {
+          if (lineClass === 'cr') return y(d.cr.toFixed(2));
+          return idx === 1 ? yCount(d.pinGenSucCount) : yCount(d.pinVerSucCount);
+        })
+        .attr('r', 4)
+        .attr('fill', idx === 0 ? '#1f77b4' : idx === 1 ? '#ff7f0e' : '#2ca02c')
+        .on('mouseover', handleMouseOver)
+        .on('mouseout', handleMouseOut);
+    });
   }, [data, title]);
 
   return (
     <>
-      <svg
-        ref={svgRef}
-        width={800}
-        height={400}
-      ></svg>
+      <svg ref={svgRef} width={800} height={400}></svg>
       <div
         ref={tooltipRef}
         className="tooltip"

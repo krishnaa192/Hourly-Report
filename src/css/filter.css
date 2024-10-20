@@ -1,6 +1,4 @@
-body{
-    background-color: #fff
-}
+
 
 .filter-container{
     display: flex;
@@ -20,16 +18,13 @@ body{
 }
 
 select{
-    width: 230px ;
-    height: 35px;
-    margin-right: 80px;
+  width: 198px;
+  height: 35px;
+
     margin-top: 15px;
     border-radius: 5px;
 }
-.date{
-    margin-right: 80px;
-    margin-top: 15px;
-}
+
 .date input{
     margin-right: 10px;
     width: 150px ;
@@ -40,6 +35,16 @@ select{
     flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+.terr{
+  width: 150px;
+  margin-left: -21px;
+}
+.op{
+  margin-left: -88px;
+}
+.partner{
+  margin-left: -100px;
 }
 .action-btn button{
     border:  none;

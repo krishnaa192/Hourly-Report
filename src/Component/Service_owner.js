@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import '../css/Table.css'; // assuming the CSS is linked here
 import GraphModal from './GraphData'; // Import your GraphModal
+import * as XLSX from 'xlsx';
+import Nofilter from './Nofilter';
 
 const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
@@ -83,12 +85,82 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const hours = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
 
   if (!filters.serviceOwner) {
-    return <p>Please apply filters to see the data.</p>;
+    return <Nofilter/>;
   }
 
   if (loading) {
     return <div className="loading-spinner">Loading data...</div>;
   }
+  const handleExport = (date) => {
+    const exportData = groupedData[date];
+    if (!exportData) return;
+  
+    // Prepare data for the worksheet
+    const sheetData = [];
+    Object.keys(exportData).forEach((serviceId) => {
+      const flattenedData = exportData[serviceId];
+  
+      // Add service details to sheetData
+      sheetData.push(['Service ID', serviceId]);
+      sheetData.push(['Date', formatDate(date)]);
+      sheetData.push(['Service Name', flattenedData[0]?.serviceName || 'N/A']);
+      sheetData.push(['Territory', flattenedData[0]?.territory || 'N/A']);
+      sheetData.push(['Operator', flattenedData[0]?.operatorname || 'N/A']);
+      sheetData.push(['Partner Name', flattenedData[0]?.partnerName || 'N/A']);
+      sheetData.push(['Service Owner', flattenedData[0]?.service_owner || 'N/A']);
+      sheetData.push([]); // Add a blank row for separation
+  
+      // Hours row: push headers for each hour
+      sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours` is an array of hour numbers
+  
+      // CR Row
+      const crRow = ['CR%'];
+      crRow.push(calculateCR(
+        flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+        flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+      ));
+  
+      // Iterate over hours
+      hours.forEach((hour) => {
+        const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+        crRow.push(item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA');
+      });
+      sheetData.push(crRow);
+  
+      // Pin Gen Row
+      const pinGenRow = ['Pin Gen'];
+      pinGenRow.push(flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0));
+      hours.forEach((hour) => {
+        const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+        pinGenRow.push(item ? item.pinGenSucCount : 0);
+      });
+      sheetData.push(pinGenRow);
+  
+      // Pin Ver Row
+      const pinVerRow = ['Pin Ver'];
+      pinVerRow.push(flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0));
+      hours.forEach((hour) => {
+        const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+        pinVerRow.push(item ? item.pinVerSucCount : 0);
+      });
+      sheetData.push(pinVerRow);
+  
+      sheetData.push([]); // Add another blank row for separation
+    });
+  
+    // Create a worksheet and workbook
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+    const workbook = XLSX.utils.book_new();
+  
+    // Get the service owner for export
+    const serviceOwner = exportData[Object.keys(exportData)[0]][0]?.service_owner || 'UnknownOwner';
+  
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Traffic Data');
+  
+    // Export the workbook
+    XLSX.writeFile(workbook, `${serviceOwner}_${formatDate(date)}.xlsx`);
+  };
+  
   return (
     <div className="table-container">
       <div className="filters-display">
@@ -106,9 +178,9 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
         <div key={date} className="date-section">
           <div className="section-header">
             <span>{formatDate(date)}</span>
-            <button className="export-btn" onClick={() => onExport(date)}>
-              <FontAwesomeIcon icon={faFileExport} /> Export
-            </button>
+            <button className="export-btn" onClick={() => handleExport(date)}>
+                <FontAwesomeIcon icon={faFileExport} /> Export
+              </button>
           </div>
 
           <table className="styled-table">

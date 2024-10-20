@@ -77,6 +77,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           {/* Date Range Input */}
           <div className="date">
             <label>Date Range</label>
+            <div className='date-input'>
             <input
               type="date"
               value={dateRange.from}
@@ -87,6 +88,8 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
               value={dateRange.to}
               onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
             />
+            </div>
+           
           </div>
 
           {/* Service Name Dropdown */}
@@ -103,9 +106,9 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Territory Dropdown */}
-          <div>
+          <div className='terr' >
             <label>Territory</label>
-            <select value={territory} onChange={(e) => setTerritory(e.target.value)}>
+            <select  value={territory} onChange={(e) => setTerritory(e.target.value)}>
               <option value="">Select Territory</option>
               {territories.map((territory, idx) => (
                 <option key={idx} value={territory}>
@@ -116,7 +119,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Operator Dropdown */}
-          <div>
+          <div className='op'> 
             <label>Operator</label>
             <select value={operator} onChange={(e) => setOperator(e.target.value)}>
               <option value="">Select Operator</option>
@@ -129,7 +132,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Partner Name Dropdown */}
-          <div>
+          <div className='partner'>
             <label>Partner Name</label>
             <select value={partnerName} onChange={(e) => setPartnerName(e.target.value)}>
               <option value="">Select Partner Name</option>

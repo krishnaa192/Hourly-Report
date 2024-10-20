@@ -29,12 +29,22 @@ const TrafficFilterdata = ({ setFilters, serviceNames, territories, operators, p
   };
 
   const clearFilters = () => {
+ 
     setDateRange({ from: '', to: '' });
     setServiceName('');
     setTerritory('');
     setOperator('');
     setPartnerName('');
-    setFilters({}); 
+
+    // Clear filters in the parent component as well
+    setFilters({
+  
+      dateRange: { from: '', to: '' },
+      serviceName: '',
+      territory: '',
+      operator: '',
+      partnerName: '',
+    });
   };
 
   return (
@@ -55,18 +65,22 @@ const TrafficFilterdata = ({ setFilters, serviceNames, territories, operators, p
 
         {/* Date Range Input */}
         <div className="date">
-          <label>Date Range</label>
-          <input
-            type="date"
-            value={dateRange.from}
-            onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-          />
-          <input
-            type="date"
-            value={dateRange.to}
-            onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-          />
-        </div>
+            <label>Date Range</label>
+            <div className='date-input'>
+            <input
+              type="date"
+              value={dateRange.from}
+              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+            />
+            <input
+              type="date"
+              value={dateRange.to}
+              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+            />
+            </div>
+           
+          </div>
+
         
         {/* Territory Dropdown */}
         <div>
@@ -82,20 +96,20 @@ const TrafficFilterdata = ({ setFilters, serviceNames, territories, operators, p
         </div>
 
         {/* Operator Dropdown */}
-        <div>
-          <label>Operator</label>
-          <select value={operator} onChange={(e) => setOperator(e.target.value)}>
-            <option value="">Select Operator</option>
-            {operators.map((operator, idx) => (
-              <option key={idx} value={operator}>
-                {operator}
-              </option>
-            ))}
-          </select>
-        </div>
+        <div className='op'> 
+            <label>Operator</label>
+            <select value={operator} onChange={(e) => setOperator(e.target.value)}>
+              <option value="">Select Operator</option>
+              {operators.map((operator, idx) => (
+                <option key={idx} value={operator}>
+                  {operator}
+                </option>
+              ))}
+            </select>
+          </div>
 
         {/* Service Name Dropdown */}
-        <div>
+        <div className='partner'>
           <label>Service Name</label>
           <select value={serviceName} onChange={(e) => setServiceName(e.target.value)}>
             <option value="">Select Service Name</option>

@@ -1,6 +1,8 @@
 .tab-container {
     display: flex;
-    margin-bottom: 20px;
+    padding-bottom: 20px;
+    background: white;
+    border-bottom: 2px solid black;
   }
   
   .tab {
@@ -13,6 +15,12 @@
   
   .tab.active {
     background-color: #007bff;
+
+ 
     color: white;
+  }
+  .tab{
+    font-weight: bolder;
+   
   }
   

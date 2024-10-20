@@ -5,6 +5,7 @@ import '../css/hourlydata.css'; // Styles for tabs
 import TrafficFilterdata from './TrafficFilter'; // Your Tab 2 filter component
 import TrafficDataComponent from './Traffic'; //
 import { fetchHourlyInappReport } from '../Utils'
+import Loaders from './Loader';
 
 const Hourlydata = () => {
   const [data, setData] = useState([]); // Raw data from the API
@@ -149,7 +150,7 @@ const Hourlydata = () => {
   const partnerNamesTab2 = getUniqueValues('partnerName', 'tab2');
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loaders/>;
   }
 
   return (

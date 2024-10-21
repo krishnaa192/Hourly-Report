@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../css/Table.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../css/filter.css';
@@ -11,6 +11,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
   const [territory, setTerritory] = useState('');
   const [operator, setOperator] = useState('');
   const [partnerName, setPartnerName] = useState('');
+  const [dateError, setDateError] = useState(''); 
 
   // Extract unique values for dropdowns based on selected service owner
   const getUniqueValues = (key) => {
@@ -24,11 +25,19 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
   const partnerNames = getUniqueValues('partnerName');
 
   const applyFilters = () => {
-    if (new Date(dateRange.from) > new Date(dateRange.to)) {
-      alert('The "from" date cannot be later than the "to" date.');
+    if (!dateRange.from || !dateRange.to) {
+      setDateError('Dates are required.');
       return;
     }
+  
+    if (new Date(dateRange.to) >  new Date() ||  new Date(dateRange.from) > new Date()) {
+      setDateError('Invalid date selection');
+      return;
+    }
+    // Clear the error message
+    setDateError('');
 
+    // Apply the filters
     setFilters({
       serviceOwner,
       dateRange,
@@ -38,6 +47,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
       partnerName,
     });
   };
+
   const clearFilters = () => {
     setServiceOwner('');
     setDateRange({ from: '', to: '' });
@@ -55,6 +65,9 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
       operator: '',
       partnerName: '',
     });
+
+    // Clear the error message
+    setDateError('');
   };
 
   return (
@@ -76,20 +89,25 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
 
           {/* Date Range Input */}
           <div className="date">
-            <label>Date Range</label>
-            <div className='date-input'>
-            <input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-            />
-            <input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-            />
+            <label>Date Range*</label>
+            <div className="date-input">
+              <input
+                type="date"
+                value={dateRange.from}
+                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                className={dateError ? 'error' : ''}
+                required
+              />
+              <input
+                type="date"
+                value={dateRange.to}
+                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                className={dateError ? 'error' : ''}
+                required
+              />
             </div>
-           
+            {/* Display red warning message if there's a validation error */}
+            {dateError && <p className="error-message">{dateError}</p>}
           </div>
 
           {/* Service Name Dropdown */}
@@ -106,9 +124,9 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Territory Dropdown */}
-          <div className='terr' >
+          <div className="terr">
             <label>Territory</label>
-            <select  value={territory} onChange={(e) => setTerritory(e.target.value)}>
+            <select value={territory} onChange={(e) => setTerritory(e.target.value)}>
               <option value="">Select Territory</option>
               {territories.map((territory, idx) => (
                 <option key={idx} value={territory}>
@@ -119,7 +137,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Operator Dropdown */}
-          <div className='op'> 
+          <div className="op">
             <label>Operator</label>
             <select value={operator} onChange={(e) => setOperator(e.target.value)}>
               <option value="">Select Operator</option>
@@ -132,7 +150,7 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
           </div>
 
           {/* Partner Name Dropdown */}
-          <div className='partner'>
+          <div className="partner">
             <label>Partner Name</label>
             <select value={partnerName} onChange={(e) => setPartnerName(e.target.value)}>
               <option value="">Select Partner Name</option>

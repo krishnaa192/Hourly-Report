@@ -317,10 +317,7 @@ table {
     border: 1px solid #ddd;
   }
   
-  /* Add margin-like effect for the last row of each date */
-  tr.last-row {
-    border-bottom: 4px solid #000; /* A thick border to create visual separation */
-  }
+ 
   
   /* Optional: hover effects for better UX */
   tr:hover {

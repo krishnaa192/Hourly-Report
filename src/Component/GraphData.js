@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import LinearChart from './Single'; // Assuming your D3 chart is in this file
-
-// Custom date formatting function
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  date.setDate(date.getDate() - 1); // Subtract one day
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+import LinearChart from './Single'; 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialData }) => {
   const [data, setData] = useState([]);
@@ -23,20 +15,21 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
         setLoading(true);
         setError(null);
 
-        // Check if initialData is an array, otherwise set an empty array as fallback
         const result = Array.isArray(initialData) ? initialData : [];
 
         const acc = {};
 
         // Process the result
         result.forEach((item) => {
-          if (!item || !item.appServiceId || !item.timestamp) {
+          if (!item || !item.appServiceId || !item.actDate) {
             console.warn('Skipping invalid item:', item); // Skip any invalid data
             return;
           }
 
           const serviceId = item.appServiceId.toString(); // Ensure it's a string
-          const date = formatDate(item.timestamp); // Use custom date formatting
+          const date = new Date(item.actDate);
+         
+          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
 
           // Initialize the service ID in the accumulator if it doesn't exist
           if (!acc[serviceId]) {
@@ -44,20 +37,20 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
           }
 
           // Initialize the date in the accumulator for this service ID if it doesn't exist
-          if (!acc[serviceId][date]) {
-            acc[serviceId][date] = { hours: [] }; // Initialize hours as an empty array
+          if (!acc[serviceId][formattedDate]) {
+            acc[serviceId][formattedDate] = { hours: [] }; // Initialize hours as an empty array
           }
 
           // Calculate CR
           const cr = item.pinGenSucCount > 0 ? (item.pinVerSucCount / item.pinGenSucCount) * 100 : 0; // Calculate CR
 
           // Add hours data for the service ID and date with CR, pinGenSucCount, and pinVerSucCount
-          acc[serviceId][date].hours.push({
+          acc[serviceId][formattedDate].hours.push({
             hour: item.hrs,
             cr: cr, // Store CR directly
             pinGenSucCount: item.pinGenSucCount, // Store pinGenSucCount
             pinVerSucCount: item.pinVerSucCount, // Store pinVerSucCount
-            date: date, // Store the date as well
+            date: formattedDate, // Store the formatted date
           });
         });
 
@@ -65,7 +58,10 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
         console.log('Processed Data:', acc);
 
         // Filter data based on the selected serviceID and formatted selectedDate
-        const formattedSelectedDate = formatDate(selectedDate);
+        const selectedDateObj = new Date(selectedDate);
+        selectedDateObj.setDate(selectedDateObj.getDate()); // Subtract one day
+        const formattedSelectedDate = `${String(selectedDateObj.getDate()).padStart(2, '0')}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${selectedDateObj.getFullYear()}`;
+
         const filteredData = acc[serviceID] ? acc[serviceID][formattedSelectedDate]?.hours || [] : [];
 
         // Sort the filtered data based on hour
@@ -96,29 +92,33 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} ariaHideApp={false}>
-      {/* Loading state */}
       {loading ? (
         <div>
           <p>Loading...</p>
-          <button onClick={onRequestClose}>Cancel</button>
+          <button onClick={onRequestClose}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
         </div>
       ) : (
         <>
-          <h2>Service ID: {serviceID}</h2>
-          <h3>Date: {formatDate(selectedDate)}</h3>
+          <button onClick={onRequestClose} className='cancel'>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          <h2>Service ID: {serviceID}</h2>  
+          <h3>Date: {data.length > 0 ? data[0].date : ''}</h3> {/* Display actDate from data */}
           {data.length > 0 ? (
             <LinearChart
               data={data}
-              title={`Graph for Service ID ${serviceID} on ${formatDate(selectedDate)}`}
+              title={`Graph for Service ID ${serviceID} on ${data[0].date}`}
             />
           ) : (
             <p>No data available for the selected service ID and date.</p>
           )}
-          <button onClick={onRequestClose}>Close</button>
         </>
       )}
     </Modal>
   );
+  
 };
 
 export default GraphModal;

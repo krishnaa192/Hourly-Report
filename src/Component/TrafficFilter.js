@@ -10,22 +10,31 @@ const TrafficFilterdata = ({ setFilters, serviceNames, territories, operators, p
   const [territory, setTerritory] = useState('');
   const [operator, setOperator] = useState('');
   const [partnerName, setPartnerName] = useState('');
+  const [dateError, setDateError] = useState(''); 
 
   const applyFilters = () => {
-    // Check for valid date range
-    if (dateRange.from && dateRange.to && new Date(dateRange.from) > new Date(dateRange.to)) {
-      alert('The "from" date cannot be later than the "to" date.');
+    if (!dateRange.from || !dateRange.to) {
+      setDateError('Dates are required.');
+      return;
+    }
+    if (new Date(dateRange.from) > new Date(dateRange.to)) {
+      setDateError('The "from" date cannot be later than the "to" date.');
       return;
     }
 
-    // Pass filters to parent component
+    // Clear the error message
+    setDateError('');
+
+    // Apply the filters
     setFilters({
-      partnerName,
       dateRange,
       serviceName,
       territory,
       operator,
+      partnerName,
     });
+
+    setDateError('');
   };
 
   const clearFilters = () => {

@@ -117,7 +117,7 @@ const LinearChart = ({ data, title }) => {
         tooltip
           .style('opacity', 1)
           .html(`
-          Hour: ${d.hour}:00<br/>
+          Hour: ${d.hour}-${d.hour+1}<br/>
           CR: ${d.cr.toFixed(2)}%
           `);
       })

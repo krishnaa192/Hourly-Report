@@ -4,7 +4,9 @@ import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import ThreeGraphModal from './threeGraphData';
 import '../css/Table.css'; // assuming the CSS is linked here
 import * as XLSX from 'xlsx';
+import { faChartBar } from '@fortawesome/free-solid-svg-icons';
 import Nofilter from './Nofilter';
+
 
 const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
@@ -31,15 +33,7 @@ const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
     return `${((pinVerSucCount / pinGenSucCount) * 100).toFixed(0)}%`;
   }, []);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    date.setDate(date.getDate() - 1);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-// Define hours array globally or at a higher scope
+
 
 
 const handleExport = (date) => {
@@ -53,7 +47,7 @@ const handleExport = (date) => {
 
       // Add service details to sheetData
       sheetData.push(['Service ID', serviceId]);
-      sheetData.push(['Date', formatDate(date)]);
+      sheetData.push(['Date', flattenedData[0].actDate]);
       sheetData.push(['Service Name', flattenedData[0]?.serviceName || 'N/A']);
       sheetData.push(['Territory', flattenedData[0]?.territory || 'N/A']);
       sheetData.push(['Operator', flattenedData[0]?.operatorname || 'N/A']);
@@ -106,7 +100,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Traffic Data');
 
   // Export the workbook
-  XLSX.writeFile(workbook, `${partnerName}_${formatDate(date)}.xlsx`);
+  XLSX.writeFile(workbook, `${partnerName}_${9}.xlsx`);
 };
 
 
@@ -128,8 +122,8 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
     return data.filter(item => {
       return (
         (!filters.partnerName || item.partnerName === filters.partnerName) &&
-        (!filters.dateRange.from || new Date(item.timestamp) >= new Date(filters.dateRange.from)) &&
-        (!filters.dateRange.to || new Date(item.timestamp) <= new Date(filters.dateRange.to)) &&
+        (!filters.dateRange.from || new Date(item.actDate) >= new Date(filters.dateRange.from)) &&
+        (!filters.dateRange.to || new Date(item.actDate) <= new Date(filters.dateRange.to)) &&
         (!filters.serviceName || item.serviceName === filters.serviceName) &&
         (!filters.territory || item.territory === filters.territory) &&
         (!filters.operator || item.operatorname === filters.operator)
@@ -186,80 +180,91 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
         </ul>
       </div>
       {Object.keys(groupedData).length === 0 ? (
-        <p>No data available for the selected filters.</p>
-      ) : (
-        Object.keys(groupedData).map((date) => (
-          <div key={date} className="date-section">
-            <div className="section-header">
-              <span>{formatDate(date)}</span>
-              <button className="export-btn" onClick={() => handleExport(date)}>
-                <FontAwesomeIcon icon={faFileExport} /> Export
-              </button>
-            </div>
+  <p>No data available for the selected filters.</p>
+) : (
+  Object.keys(groupedData).map((date) => {
+    // Extract the first service's data to get the common actDate
+    const serviceIds = Object.keys(groupedData[date]);
+    const firstServiceId = serviceIds[0];
+    const firstFlattenedData = groupedData[date][firstServiceId];
+    const actDate = firstFlattenedData[0]?.actDate || 'N/A'; 
 
-            <table className="styled-table">
-              <thead>
-                {Object.keys(groupedData[date]).map((serviceId) => {
-                  const flattenedData = groupedData[date][serviceId];
-                  const { serviceName, territory, operatorname, partnerName, service_owner } = flattenedData[0] || {};
+    return (
+      <div key={date} className="date-section">
+        <div className="section-header">
+          <span>{actDate}</span> {/* Display actDate once */}
+          <button className="export-btn" onClick={() => handleExport(date)}>
+            <FontAwesomeIcon icon={faFileExport} /> Export
+          </button>
+        </div>
 
-                  return (
-                    <React.Fragment key={`${date}-${serviceId}`}>
-                      <tr className='head'>
-                        <th className='content-head' colSpan={hours.length + 2}>
-                          Service ID: {serviceId} | Service Name: {serviceName || 'N/A'} | Territory: {territory || 'N/A'} | Operator: {operatorname || 'N/A'} | Partner Name: {partnerName || 'N/A'} | Service Owner: {service_owner || 'N/A'} |  <button onClick={() => openModal(serviceId, date, flattenedData)}>Open Graph Modal</button>
-                        </th>
-                      </tr>
+        <table className="styled-table">
+          <thead>
+            {serviceIds.map((serviceId) => {
+              const flattenedData = groupedData[date][serviceId];
+              const { serviceName, territory, operatorname, partnerName, service_owner } = flattenedData[0] || {};
 
-                      <tr className="header-row">
-                        <th>{formatDate(date)}</th>
-                        <th>Total CR</th>
-                        {hours.map((hour, hourIdx) => (
-                          <th key={hourIdx}>{hour}</th>
-                        ))}
-                      </tr>
+              return (
+                <React.Fragment key={`${date}-${serviceId}`}>
+                  <tr className='head'>
+                    <th className='content-head' colSpan={hours.length + 2}>
+                      Service ID: {serviceId} | Service Name: {serviceName || 'N/A'} | Territory: {territory || 'N/A'} | Operator: {operatorname || 'N/A'} | Partner Name: {partnerName || 'N/A'} | Service Owner: {service_owner || 'N/A'} |  
+                      <button onClick={() => openModal(serviceId, date, flattenedData)}>
+                        <FontAwesomeIcon icon={faChartBar} />
+                      </button>
+                    </th>
+                  </tr>
 
-                      <tr className="cr-row">
-                        <td>CR%</td>
-                        <td>{calculateCR(
-                          flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
-                          flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
-                        )}</td>
-                        {hours.map((hour) => {
-                          const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
-                          return (
-                            <td key={hour}>
-                              {item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA'}
-                            </td>
-                          );
-                        })}
-                      </tr>
+                  <tr className="header-row">
+                    <th>{actDate}</th> {/* Use the common actDate */}
+                    <th>Total CR</th>
+                    {hours.map((hour, hourIdx) => (
+                      <th key={hourIdx}>{hour}</th>
+                    ))}
+                  </tr>
 
-                      <tr>
-                        <td>Pin Gen</td>
-                        <td>{flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)}</td>
-                        {hours.map((hour) => {
-                          const item = flattenedData.find((d) => String(d.hrs + 1) === hour);
-                          return <td key={hour}>{item ? item.pinGenSucCount : 0}</td>;
-                        })}
-                      </tr>
+                  <tr className="cr-row">
+                    <td>CR%</td>
+                    <td>{calculateCR(
+                      flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+                      flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+                    )}</td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+                      return (
+                        <td key={hour}>
+                          {item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA'}
+                        </td>
+                      );
+                    })}
+                  </tr>
 
-                      <tr className="last-row">
-                        <td>Pin Ver</td>
-                        <td>{flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0)}</td>
-                        {hours.map((hour) => {
-                          const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
-                          return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
-                        })}
-                      </tr>
-                    </React.Fragment>
-                  );
-                })}
-              </thead>
-            </table>
-          </div>
-        ))
-      )}
+                  <tr>
+                    <td>Pin Gen</td>
+                    <td>{flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)}</td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => String(d.hrs + 1) === hour);
+                      return <td key={hour}>{item ? item.pinGenSucCount : 0}</td>;
+                    })}
+                  </tr>
+
+                  <tr className="last-row">
+                    <td>Pin Ver</td>
+                    <td>{flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0)}</td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+                      return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
+                    })}
+                  </tr>
+                </React.Fragment>
+              );
+            })}
+          </thead>
+        </table>
+      </div>
+    );
+  })
+)}
 
      
 <ThreeGraphModal 

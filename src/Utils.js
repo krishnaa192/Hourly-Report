@@ -1,7 +1,9 @@
 // utils/apiService.js
+
+const api_url = process.env.REACT_APP_API_URL;
 export const fetchHourlyInappReport = async () => {
     try {
-      const response = await fetch('https://wap.matrixads.in/mglobopay/getHourlyInappReport');
+      const response = await fetch(api_url);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

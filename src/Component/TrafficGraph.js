@@ -148,11 +148,23 @@ const ThreeLinearChart = ({ data, title }) => {
 
     // Add tooltip handling logic for each line
     const handleMouseOver = (event, d) => {
+      let tooltipContent = `Hour: ${d.hour}<br>`;
+      
+      // Show CR value or indicate it's zero
+      if (d.cr === 0) {
+        tooltipContent += 'CR: 0 (No conversion)<br>';
+      } else {
+        tooltipContent += `CR: ${d.cr}<br>`;
+      }
+      
+      tooltipContent += `PinGenSucCount: ${d.pinGenSucCount}<br>PinVerSucCount: ${d.pinVerSucCount}`;
+      
       tooltip.style('opacity', 1)
-        .html(`Hour: ${d.hour}<br>CR: ${d.cr}<br>PinGenSucCount: ${d.pinGenSucCount}<br>PinVerSucCount: ${d.pinVerSucCount}`)
+        .html(tooltipContent)
         .style('left', `${event.pageX + 10}px`)
         .style('top', `${event.pageY - 20}px`);
     };
+    
 
     const handleMouseOut = () => {
       tooltip.style('opacity', 0);

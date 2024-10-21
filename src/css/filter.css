@@ -112,17 +112,36 @@ select{
     gap: 15px;
     margin-top: 20px;
   }
-  
+  /* filter.css */
+
+/* Error border for invalid input fields */
+.error {
+  border: 1px solid red;
+}
+
+/* Red warning message under date inputs */
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
   /* Apply Filters button */
   .action-btn button {
     padding: 10px 15px;
     font-size: 14px;
-    color: #fff;
-    background-color: #007bff;
+    color: #000;
+    background-color: #A6ADCE !important;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+  }
+  .cancel{
+    background-color: #FF0000 !important;
+    padding: 5px;
+    border: none;
+ 
   }
   
   .action-btn button:hover {

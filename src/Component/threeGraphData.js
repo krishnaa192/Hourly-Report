@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import ThreeLinearChart from './TrafficGraph' // Assuming your D3 chart is in this file
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 // Custom date formatting function
 const formatDate = (dateString) => {
@@ -109,6 +111,9 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
         </div>
       ) : (
         <>
+         <button onClick={onRequestClose} className='cancel'>
+  <FontAwesomeIcon icon={faTimes} />
+</button>
           <h2>Service ID: {serviceID}</h2>
           <h3>Date: {formatDate(selectedDate)}</h3>
           {data.length > 0 ? (
@@ -119,7 +124,7 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
           ) : (
             <p>No data available for the selected service ID and date.</p>
           )}
-          <button onClick={onRequestClose}>Close</button>
+      
         </>
       )}
     </Modal>

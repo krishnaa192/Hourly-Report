@@ -68,7 +68,7 @@ const Hourlydata = () => {
       const fromDate = new Date(filtersTab1.dateRange.from);
       const toDate = new Date(filtersTab1.dateRange.to);
       filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.timestamp.split(' ')[0]);
+        const itemDate = new Date(item.actDate);
         return itemDate >= fromDate && itemDate <= toDate;
       });
     }

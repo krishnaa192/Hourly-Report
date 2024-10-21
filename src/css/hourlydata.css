@@ -2,15 +2,20 @@
     display: flex;
     padding-bottom: 20px;
     background: white;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid white;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
   .tab {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: #A6ADCE ;
     margin-right: 10px;
+    margin-top: 10px;
+    border-radius: 7px;
   }
   
   .tab.active {

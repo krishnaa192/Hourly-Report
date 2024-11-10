@@ -42,7 +42,8 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
           }
 
           // Calculate CR
-          const cr = item.pinGenSucCount > 0 ? (item.pinVerSucCount / item.pinGenSucCount) * 100 : 0; // Calculate CR
+          const cr = item.pinGenSucCount > 0 ? ((item.pinVerSucCount / item.pinGenSucCount) * 100).toFixed(2) : "0.00";
+ ; // Calculate CR
 
           // Add hours data for the service ID and date with CR, pinGenSucCount, and pinVerSucCount
           acc[serviceId][formattedDate].hours.push({
@@ -53,10 +54,6 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
             date: formattedDate, // Store the formatted date
           });
         });
-
-        // Log the processed data for debugging
-        console.log('Processed Data:', acc);
-
         // Filter data based on the selected serviceID and formatted selectedDate
         const selectedDateObj = new Date(selectedDate);
         selectedDateObj.setDate(selectedDateObj.getDate()); // Subtract one day
@@ -68,7 +65,7 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
         const sortedData = filteredData.sort((a, b) => a.hour - b.hour);
 
         // Log the filtered and sorted data for debugging
-        console.log('Sorted Filtered Data:', sortedData);
+    
 
         setData(sortedData);
       } catch (err) {

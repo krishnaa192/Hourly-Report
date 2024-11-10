@@ -154,7 +154,7 @@ const ThreeLinearChart = ({ data, title }) => {
       if (d.cr === 0) {
         tooltipContent += 'CR: 0 (No conversion)<br>';
       } else {
-        tooltipContent += `CR: ${d.cr}<br>`;
+        tooltipContent += `CR: ${d.cr.toFixed(2)}<br>`;
       }
       
       tooltipContent += `PinGenSucCount: ${d.pinGenSucCount}<br>PinVerSucCount: ${d.pinVerSucCount}`;

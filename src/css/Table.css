@@ -522,6 +522,7 @@ input[type="number"]:focus {
   appearance: none;
   -webkit-appearance: none;
   margin-top: 15px;
+  min-width: 100px;
   -moz-appearance: none;
   width: 90%;
   padding: 1px 1px;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import ThreeLinearChart from './TrafficGraph' // Assuming your D3 chart is in this file
+import ThreeLinearChart from './TrafficGraph'; // Assuming your D3 chart is in this file
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -25,61 +25,40 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
         setLoading(true);
         setError(null);
 
-        // Check if initialData is an array, otherwise set an empty array as fallback
         const result = Array.isArray(initialData) ? initialData : [];
-
-        // Log the initialData and result for debugging
-        console.log('Initial Data:', initialData);
-        console.log('Processed Result:', result);
-
-        // Initialize accumulator for grouping data
         const acc = {};
 
-        // Process the result
         result.forEach((item) => {
           if (!item || !item.appServiceId || !item.timestamp) {
-            console.warn('Skipping invalid item:', item); // Skip any invalid data
+            console.warn('Skipping invalid item:', item); 
             return;
           }
 
-          const serviceId = item.appServiceId.toString(); // Ensure it's a string
-          const date = formatDate(item.timestamp); // Use custom date formatting
+          const serviceId = item.appServiceId.toString();
+          const date = formatDate(item.timestamp);
 
-          // Initialize the service ID in the accumulator if it doesn't exist
           if (!acc[serviceId]) {
             acc[serviceId] = {};
           }
 
-          // Initialize the date in the accumulator for this service ID if it doesn't exist
           if (!acc[serviceId][date]) {
-            acc[serviceId][date] = { hours: [] }; // Initialize hours as an empty array
+            acc[serviceId][date] = { hours: [] };
           }
 
-          // Calculate CR
-          const cr = item.pinGenSucCount > 0 ? (item.pinVerSucCount / item.pinGenSucCount) * 100 : 0; // Calculate CR
+          const cr = item.pinGenSucCount > 0 ? ((item.pinVerSucCount / item.pinGenSucCount) * 100).toFixed(2) : "0.00";
 
-          // Add hours data for the service ID and date with CR, pinGenSucCount, and pinVerSucCount
           acc[serviceId][date].hours.push({
             hour: item.hrs,
-            cr: cr, // Store CR directly
-            pinGenSucCount: item.pinGenSucCount, // Store pinGenSucCount
-            pinVerSucCount: item.pinVerSucCount, // Store pinVerSucCount
-            date: date, // Store the date as well
+            cr: parseFloat(cr),
+            pinGenSucCount: item.pinGenSucCount,
+            pinVerSucCount: item.pinVerSucCount,
+            date: date,
           });
         });
 
-        // Log the processed data for debugging
-        console.log('Processed Data:', acc);
-
-        // Filter data based on the selected serviceID and formatted selectedDate
         const formattedSelectedDate = formatDate(selectedDate);
         const filteredData = acc[serviceID] ? acc[serviceID][formattedSelectedDate]?.hours || [] : [];
-
-        // Sort the filtered data based on hour
         const sortedData = filteredData.sort((a, b) => a.hour - b.hour);
-
-        // Log the filtered and sorted data for debugging
-        console.log('Sorted Filtered Data:', sortedData);
 
         setData(sortedData);
       } catch (err) {
@@ -90,20 +69,17 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
       }
     };
 
-    // Fetch the data only if the modal is open
     if (isOpen) {
       fetchData();
     }
   }, [serviceID, selectedDate, isOpen, initialData]);
 
-  // Error state
   if (error) {
     return <div>{error}</div>;
   }
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} ariaHideApp={false}>
-      {/* Loading state */}
       {loading ? (
         <div>
           <p>Loading...</p>
@@ -111,11 +87,28 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
         </div>
       ) : (
         <>
-         <button onClick={onRequestClose} className='cancel'>
-  <FontAwesomeIcon icon={faTimes} />
-</button>
-          <h2>Service ID: {serviceID}</h2>
+          <button onClick={onRequestClose} className='cancel'>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          <h2>Service ID: {serviceID} |   </h2>
           <h3>Date: {formatDate(selectedDate)}</h3>
+
+          {/* Legend */}
+          <div className="legend" style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ width: '15px', height: '15px', backgroundColor: '#1f77b4', marginRight: '5px' }}></span>
+              <span>CR (%)</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ width: '15px', height: '15px', backgroundColor: '#ff7f0e', marginRight: '5px' }}></span>
+              <span>PinGenSucCount</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ width: '15px', height: '15px', backgroundColor: '#2ca02c', marginRight: '5px' }}></span>
+              <span>PinVerSucCount</span>
+            </div>
+          </div>
+
           {data.length > 0 ? (
             <ThreeLinearChart
               data={data}
@@ -124,7 +117,6 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
           ) : (
             <p>No data available for the selected service ID and date.</p>
           )}
-      
         </>
       )}
     </Modal>

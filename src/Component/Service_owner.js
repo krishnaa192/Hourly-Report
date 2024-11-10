@@ -6,6 +6,7 @@ import '../css/Table.css'; // assuming the CSS is linked here
 import GraphModal from './GraphData'; // Import your GraphModal
 import * as XLSX from 'xlsx';
 import Nofilter from './Nofilter';
+import  LinearProgressWithLabel from './Loader'
 
 const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
@@ -101,7 +102,7 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   }
 
   if (loading) {
-    return <div className="loading-spinner">Loading data...</div>;
+    return <div className="loading-spinner"><LinearProgressWithLabel/></div>;
   }
   const handleExport = (date) => {
     const exportData = groupedData[date];
@@ -173,18 +174,16 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
     // Export the workbook with the correct filename
     XLSX.writeFile(workbook, `${serviceOwner}_${actDate}.xlsx`);
   };
-  
-  
   return (
     <div className="table-container">
       <div className="filters-display">
         <ul>
-          <li>Service Owner: {filters.serviceOwner || 'All'}</li>
-          <li>Date Range: {filters.dateRange.from} - {filters.dateRange.to}</li>
-          <li>Service Name: {filters.serviceName || 'All'}</li>
+          <li>Service Owner: {filters.serviceOwner ||'All'}</li>
+          <li>Date Range: {filters.dateRange.from} -{filters.dateRange.to}</li>
+          <li>Service Name: {filters.serviceName ||'All'}</li>
           <li>Territory: {filters.territory || 'All'}</li>
-          <li>Operator: {filters.operator || 'All'}</li>
-          <li>Partner Name: {filters.partnerName || 'All'}</li>
+          <li>Operator: {filters.operator ||'All'}</li>
+          <li>Partner Name: {filters.partnerName ||'All'}</li>
         </ul>
       </div>
       {Object.keys(groupedData).map((date) => {
@@ -192,7 +191,7 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const serviceIds = Object.keys(groupedData[date]);
   const firstServiceId = serviceIds[0];
   const firstFlattenedData = groupedData[date][firstServiceId];
-  const actDate = firstFlattenedData[0]?.actDate || 'N/A'; 
+  const actDate = firstFlattenedData[0]?.actDate ||'N/A'; 
 
   return (
     <div key={date} className="date-section">

@@ -6,6 +6,7 @@ import '../css/Table.css'; // assuming the CSS is linked here
 import * as XLSX from 'xlsx';
 import { faChartBar } from '@fortawesome/free-solid-svg-icons';
 import Nofilter from './Nofilter';
+import  LinearProgressWithLabel from './Loader'
 
 
 const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
@@ -146,7 +147,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
     }, {});
   }, [filteredData]);
 
-  const hours = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
+  const hours = Array.from({ length: 24 }, (_, i) => `${i}`);
 
   const areFiltersApplied = filters && (
     filters.dateRange.from || filters.serviceName ||
@@ -161,7 +162,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
   }
 
   if (loading) {
-    return <div className="loading-spinner">Loading data...</div>;
+    return <LinearProgressWithLabel/>;
   }
 
   if (error) {
@@ -216,12 +217,15 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
                   </tr>
 
                   <tr className="header-row">
-                    <th>{actDate}</th> {/* Use the common actDate */}
-                    <th>Total CR</th>
-                    {hours.map((hour, hourIdx) => (
-                      <th key={hourIdx}>{hour}</th>
-                    ))}
-                  </tr>
+                  <th>{actDate}</th> {/* Display `actDate` in the table */}
+                  <th>Total CR</th>
+                  {hours.map((hour) => {
+                    const nextHour = Number(hour) + 1; // Ensure hour is treated as a number
+                    return (
+                      <th key={hour}>{`${hour}-${nextHour}`}</th>
+                    );
+                  })}
+                </tr>
 
                   <tr className="cr-row">
                     <td>CR%</td>
@@ -230,7 +234,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
                       flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
                     )}</td>
                     {hours.map((hour) => {
-                      const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+                      const item = flattenedData.find((d) => `${d.hrs }` === hour);
                       return (
                         <td key={hour}>
                           {item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA'}
@@ -243,7 +247,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
                     <td>Pin Gen</td>
                     <td>{flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)}</td>
                     {hours.map((hour) => {
-                      const item = flattenedData.find((d) => String(d.hrs + 1) === hour);
+                      const item = flattenedData.find((d) => String(d.hrs ) === hour);
                       return <td key={hour}>{item ? item.pinGenSucCount : 0}</td>;
                     })}
                   </tr>
@@ -252,7 +256,7 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
                     <td>Pin Ver</td>
                     <td>{flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0)}</td>
                     {hours.map((hour) => {
-                      const item = flattenedData.find((d) => `${d.hrs + 1}` === hour);
+                      const item = flattenedData.find((d) => `${d.hrs }` === hour);
                       return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
                     })}
                   </tr>

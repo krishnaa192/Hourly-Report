@@ -8,7 +8,7 @@ import { fetchHourlyInappReport } from '../Utils'
 import Loaders from './Loader';
 
 const Hourlydata = () => {
-  const [data, setData] = useState([]); // Raw data from the API
+  const [data, setData] = useState([]); 
   const [filteredDataTab1, setFilteredDataTab1] = useState([]); // For Tab 1
   const [filteredDataTab2, setFilteredDataTab2] = useState([]); // For Tab 2
   const [loading, setLoading] = useState(true);
@@ -194,7 +194,8 @@ const Hourlydata = () => {
             serviceNames={serviceNamesTab2}
             territories={territoriesTab2}
             operators={operatorsTab2}
-            applyFilters={() => applyFilters(data)} // Ensure filters are applied on change
+            data={data} 
+            applyFilters={() => applyFilters(data)} 
           />
           <TrafficDataComponent data={filteredDataTab2} filters={filtersTab2} />
         </>

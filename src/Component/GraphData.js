@@ -8,6 +8,7 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [serviceDetails, setServiceDetails] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,7 +19,7 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
         const result = Array.isArray(initialData) ? initialData : [];
 
         const acc = {};
-
+        
         // Process the result
         result.forEach((item) => {
           if (!item || !item.appServiceId || !item.actDate) {
@@ -43,8 +44,7 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
 
           // Calculate CR
           const cr = item.pinGenSucCount > 0 ? ((item.pinVerSucCount / item.pinGenSucCount) * 100).toFixed(2) : "0.00";
- ; // Calculate CR
-
+          
           // Add hours data for the service ID and date with CR, pinGenSucCount, and pinVerSucCount
           acc[serviceId][formattedDate].hours.push({
             hour: item.hrs,
@@ -53,7 +53,19 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
             pinVerSucCount: item.pinVerSucCount, // Store pinVerSucCount
             date: formattedDate, // Store the formatted date
           });
+
+          // Store additional service details if not already set
+          if (!serviceDetails[serviceId]) {
+            serviceDetails[serviceId] = {
+              partnerName: item.partnerName,
+              serviceName: item.serviceName,
+              territory: item.territory,
+              operatorname: item.operatorname,
+              service_owner: item.service_owner
+            };
+          }
         });
+
         // Filter data based on the selected serviceID and formatted selectedDate
         const selectedDateObj = new Date(selectedDate);
         selectedDateObj.setDate(selectedDateObj.getDate()); // Subtract one day
@@ -63,9 +75,6 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
 
         // Sort the filtered data based on hour
         const sortedData = filteredData.sort((a, b) => a.hour - b.hour);
-
-        // Log the filtered and sorted data for debugging
-    
 
         setData(sortedData);
       } catch (err) {
@@ -87,6 +96,9 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
     return <div>{error}</div>;
   }
 
+  // Get the service details for the selected serviceID
+  const serviceInfo = serviceDetails[serviceID] || {};
+
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} ariaHideApp={false}>
       {loading ? (
@@ -101,7 +113,15 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
           <button onClick={onRequestClose} className='cancel'>
             <FontAwesomeIcon icon={faTimes} />
           </button>
-          <h2>Service ID: {serviceID}</h2>  
+          <h3>
+  Service ID: {serviceID} | 
+  {serviceInfo.serviceName && <span>Service Name: {serviceInfo.serviceName} | </span>}
+  {serviceInfo.partnerName && <span>Service Partner: {serviceInfo.partnerName} | </span>}
+  {serviceInfo.territory && <span>Territory: {serviceInfo.territory} | </span>}
+  {serviceInfo.operatorname && <span>Operator: {serviceInfo.operatorname} | </span>}
+  {serviceInfo.service_owner && <span>Service Owner: {serviceInfo.service_owner}</span>}
+</h3>
+
           <h3>Date: {data.length > 0 ? data[0].date : ''}</h3> {/* Display actDate from data */}
           {data.length > 0 ? (
             <LinearChart
@@ -115,7 +135,6 @@ const GraphModal = ({ serviceID, selectedDate, isOpen, onRequestClose, initialDa
       )}
     </Modal>
   );
-  
 };
 
 export default GraphModal;

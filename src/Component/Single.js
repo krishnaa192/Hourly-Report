@@ -102,7 +102,7 @@ const LinearChart = ({ data, title }) => {
           .style('opacity', 1)
           .html(`
             Hour: ${d.hour}-${d.hour+1}<br/>
-            CR: ${d.cr.toFixed(2)}%
+            CR: ${d.cr}%
           `);
       })
       .on('mousemove', (event) => {

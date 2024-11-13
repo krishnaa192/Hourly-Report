@@ -31,10 +31,17 @@ const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
 
   const calculateCR = useMemo(() => (pinVerSucCount, pinGenSucCount) => {
     if (pinGenSucCount === 0) return '0%';
-    return `${((pinVerSucCount / pinGenSucCount) * 100).toFixed(0)}%`;
+    const cr = (pinVerSucCount / pinGenSucCount) * 100;
+    return `${Math.min(cr, 100).toFixed(0)}%`;
   }, []);
+  
 
-
+  const getCRColor = (crPercentage) => {
+    const crValue = parseFloat(crPercentage);
+    if (crValue <= 25) return 'red';
+    if (crValue <= 50) return 'orange';
+    return 'green';
+  };
 
 
 const handleExport = (date) => {
@@ -57,7 +64,7 @@ const handleExport = (date) => {
       sheetData.push([]); // Add a blank row for separation
 //hours row
 // Hours row: push headers for each hour
-sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours` is an array of hour numbers
+sheetData.push(['Hours','CR', ...hours.map(hour => ` ${hour}`)]); 
       // CR Row
       const crRow = ['CR%'];
       crRow.push(calculateCR(
@@ -227,21 +234,27 @@ sheetData.push(['Hours', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours`
                   })}
                 </tr>
 
-                  <tr className="cr-row">
-                    <td>CR%</td>
-                    <td>{calculateCR(
-                      flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
-                      flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
-                    )}</td>
-                    {hours.map((hour) => {
-                      const item = flattenedData.find((d) => `${d.hrs }` === hour);
-                      return (
-                        <td key={hour}>
-                          {item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA'}
-                        </td>
-                      );
-                    })}
-                  </tr>
+                <tr className="cr-row">
+  <td>CR%</td>
+  <td style={{ color: getCRColor(parseFloat(calculateCR(
+    flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+    flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+  ).replace('%', ''))) }}>
+    {calculateCR(
+      flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+      flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+    )}
+  </td>
+  {hours.map((hour) => {
+    const item = flattenedData.find((d) => String(d.hrs) === hour);
+    const crValue = item ? parseFloat(calculateCR(item.pinVerSucCount, item.pinGenSucCount).replace('%', '')) : null;
+    return (
+      <td key={hour} style={{ color: crValue !== null ? getCRColor(crValue) : 'black' }}>
+        {crValue !== null ? `${crValue}%` : 'NA'}
+      </td>
+    );
+  })}
+</tr>
 
                   <tr>
                     <td>Pin Gen</td>

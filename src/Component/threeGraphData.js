@@ -18,6 +18,7 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [serviceDetails, setServiceDetails] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +55,20 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
             pinVerSucCount: item.pinVerSucCount,
             date: date,
           });
+
+          // Store service details for displaying in the modal
+          if (!serviceDetails[serviceId]) {
+            setServiceDetails((prevDetails) => ({
+              ...prevDetails,
+              [serviceId]: {
+                partnerName: item.partnerName,
+                serviceName: item.serviceName,
+                territory: item.territory,
+                operatorname: item.operatorname,
+                service_owner: item.service_owner
+              }
+            }));
+          }
         });
 
         const formattedSelectedDate = formatDate(selectedDate);
@@ -78,6 +93,8 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
     return <div>{error}</div>;
   }
 
+  const serviceInfo = serviceDetails[serviceID] || {};
+
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} ariaHideApp={false}>
       {loading ? (
@@ -90,7 +107,14 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
           <button onClick={onRequestClose} className='cancel'>
             <FontAwesomeIcon icon={faTimes} />
           </button>
-          <h2>Service ID: {serviceID} |   </h2>
+          <h3>
+            Service ID: {serviceID} | 
+            {serviceInfo.serviceName && <span>Service Name: {serviceInfo.serviceName} | </span>}
+            {serviceInfo.partnerName && <span>Service Partner: {serviceInfo.partnerName} | </span>}
+            {serviceInfo.territory && <span>Territory: {serviceInfo.territory} | </span>}
+            {serviceInfo.operatorname && <span>Operator: {serviceInfo.operatorname} | </span>}
+            {serviceInfo.service_owner && <span>Service Owner: {serviceInfo.service_owner}</span>}
+          </h3>
           <h3>Date: {formatDate(selectedDate)}</h3>
 
           {/* Legend */}

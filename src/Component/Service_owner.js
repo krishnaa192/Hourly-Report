@@ -8,12 +8,17 @@ import * as XLSX from 'xlsx';
 import Nofilter from './Nofilter';
 import  LinearProgressWithLabel from './Loader'
 
+import { faChevronDown, faChevronUp} from '@fortawesome/free-solid-svg-icons';
+
+
 const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const [loading, setLoading] = useState(false); 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedServiceID, setSelectedServiceID] = useState(null); 
   const [selectedDate, setSelectedDate] = useState(null); 
   const [graphData, setGraphData] = useState(null); 
+  const [collapsedDates, setCollapsedDates] = useState({});
+
 
   const openModal = (serviceID, date, data) => {
     setSelectedServiceID(serviceID);
@@ -37,11 +42,12 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
 
   const getCRColor = (crPercentage) => {
     const crValue = parseFloat(crPercentage);
-    if (crValue <= 25) return 'red';
-    if (crValue <= 50) return 'orange';
+    if (crValue <= 20) return 'red';
+    if (crValue <= 35) return 'orange';
     return 'green';
   };
 
+  
   // Loading Simulation
   useEffect(() => {
     if (filters) {
@@ -98,10 +104,6 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
     }, {});
   }, [filteredData]);
 
-
-
-  
-
   const hours = Array.from({ length: 24 }, (_, i) => `${i }`);
 
   if (!filters.serviceOwner) {
@@ -111,75 +113,82 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   if (loading) {
     return <div className="loading-spinner"><LinearProgressWithLabel/></div>;
   }
-  const handleExport = (date) => {
-    const exportData = groupedData[date];
-    if (!exportData) return;
-  
-    // Prepare data for the worksheet
+  const handleExport = () => {
     const sheetData = [];
-    Object.keys(exportData).forEach((serviceId) => {
-      const flattenedData = exportData[serviceId];
   
-      // Add service details to sheetData
-      sheetData.push(['Service ID', serviceId]);
-      sheetData.push(['Date', flattenedData[0]?.actDate || 'N/A']);  // Ensure actDate is correctly handled
-      sheetData.push(['Service Name', flattenedData[0]?.serviceName || 'N/A']);
-      sheetData.push(['Territory', flattenedData[0]?.territory || 'N/A']);
-      sheetData.push(['Operator', flattenedData[0]?.operatorname || 'N/A']);
-      sheetData.push(['Partner Name', flattenedData[0]?.partnerName || 'N/A']);
-      sheetData.push(['Service Owner', flattenedData[0]?.service_owner || 'N/A']);
-      sheetData.push([]); // Add a blank row for separation
+    // Iterate over all dates in groupedData
+    Object.keys(groupedData).forEach((date) => {
+      const exportData = groupedData[date];
   
-      // Hours row: push headers for each hour
-      sheetData.push(['Hours','CR', ...hours.map(hour => ` ${hour}`)]); // Assuming `hours` is an array of hour numbers
+      Object.keys(exportData).forEach((serviceId) => {
+        const flattenedData = exportData[serviceId];
   
-      // CR Row
-      const crRow = ['CR%'];
-      crRow.push(calculateCR(
-        flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
-        flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
-      ));
+        // Add date section header
+        sheetData.push([`Date: ${date}`]);
   
-      // Iterate over hours
-      hours.forEach((hour) => {
-        const item = flattenedData.find((d) => `${d.hrs }` === hour);
-        crRow.push(item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA');
+        // Add service details to sheetData
+        sheetData.push(['Service ID', serviceId]);
+        sheetData.push(['Activation Date', flattenedData[0]?.actDate || 'N/A']);
+        sheetData.push(['Service Name', flattenedData[0]?.serviceName || 'N/A']);
+        sheetData.push(['Territory', flattenedData[0]?.territory || 'N/A']);
+        sheetData.push(['Operator', flattenedData[0]?.operatorname || 'N/A']);
+        sheetData.push(['Partner Name', flattenedData[0]?.partnerName || 'N/A']);
+        sheetData.push(['Service Owner', flattenedData[0]?.service_owner || 'N/A']);
+        sheetData.push([]); // Blank row for separation
+  
+        // Header row for hours
+        sheetData.push(['Hours', 'CR', ...hours.map((hour) => ` ${hour}`)]);
+  
+        // CR Row
+        const crRow = ['CR%'];
+        crRow.push(calculateCR(
+          flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+          flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+        ));
+  
+        hours.forEach((hour) => {
+          const item = flattenedData.find((d) => `${d.hrs}` === hour);
+          crRow.push(item ? calculateCR(item.pinVerSucCount, item.pinGenSucCount) : 'NA');
+        });
+        sheetData.push(crRow);
+  
+        // Pin Gen Row
+        const pinGenRow = ['Pin Gen'];
+        pinGenRow.push(flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0));
+        hours.forEach((hour) => {
+          const item = flattenedData.find((d) => `${d.hrs}` === hour);
+          pinGenRow.push(item ? item.pinGenSucCount : 0);
+        });
+        sheetData.push(pinGenRow);
+  
+        // Pin Ver Row
+        const pinVerRow = ['Pin Ver'];
+        pinVerRow.push(flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0));
+        hours.forEach((hour) => {
+          const item = flattenedData.find((d) => `${d.hrs}` === hour);
+          pinVerRow.push(item ? item.pinVerSucCount : 0);
+        });
+        sheetData.push(pinVerRow);
+  
+        sheetData.push([]); // Add another blank row for separation
       });
-      sheetData.push(crRow);
-  
-      // Pin Gen Row
-      const pinGenRow = ['Pin Gen'];
-      pinGenRow.push(flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0));
-      hours.forEach((hour) => {
-        const item = flattenedData.find((d) => `${d.hrs }` === hour);
-        pinGenRow.push(item ? item.pinGenSucCount : 0);
-      });
-      sheetData.push(pinGenRow);
-  
-      // Pin Ver Row
-      const pinVerRow = ['Pin Ver'];
-      pinVerRow.push(flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0));
-      hours.forEach((hour) => {
-        const item = flattenedData.find((d) => `${d.hrs }` === hour);
-        pinVerRow.push(item ? item.pinVerSucCount : 0);
-      });
-      sheetData.push(pinVerRow);
-  
-      sheetData.push([]); // Add another blank row for separation
     });
   
     // Create a worksheet and workbook
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
     const workbook = XLSX.utils.book_new();
   
-    // Get the service owner and activation date for export
-    const serviceOwner = exportData[Object.keys(exportData)[0]][0]?.service_owner || 'UnknownOwner';
-    const actDate = exportData[Object.keys(exportData)[0]][0]?.actDate || 'UnknownDate';
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
   
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Traffic Data');
+    // Export the workbook with a generic filename
+    XLSX.writeFile(workbook, `Data.xlsx`);
+  };
   
-    // Export the workbook with the correct filename
-    XLSX.writeFile(workbook, `${serviceOwner}_${actDate}.xlsx`);
+  const toggleCollapse = (date) => {
+    setCollapsedDates(prevState => ({
+      ...prevState,
+      [date]: !prevState[date], // Toggle the collapse state for the specific date
+    }));
   };
   return (
     <div className="table-container">
@@ -192,6 +201,11 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
           <li>Operator: {filters.operator ||'All'}</li>
           <li>Partner Name: {filters.partnerName ||'All'}</li>
         </ul>
+        
+  <button className="export-btn" onClick={ handleExport}>
+    <FontAwesomeIcon icon={faFileExport} /> Export All
+  </button>
+
       </div>
       {Object.keys(groupedData).map((date) => {
   // Extract the first service's data to get the common actDate
@@ -200,93 +214,104 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
   const firstFlattenedData = groupedData[date][firstServiceId];
   const actDate = firstFlattenedData[0]?.actDate ||'N/A'; 
 
+ 
+
   return (
+    
     <div key={date} className="date-section">
-      <div className="section-header">
-        <span>{actDate}</span> {/* Display the actDate once */}
-        <button className="export-btn" onClick={() => handleExport(date)}>
-          <FontAwesomeIcon icon={faFileExport} /> Export
-        </button>
+    <h3>
+      {date}
+      <button onClick={() => toggleCollapse(date)} className="toggle-btn">
+      {collapsedDates[date] ? (
+        <FontAwesomeIcon icon={faChevronDown} />
+      ) : (
+        <FontAwesomeIcon icon={faChevronUp} />
+      )}
+    </button>
+    </h3>
+   
+  
+    {/* Check if this date is collapsed or not */}
+    {!collapsedDates[date] && (
+      <div>
+        {serviceIds.map((serviceId) => {
+          const flattenedData = groupedData[date][serviceId];
+  
+          return (
+            <React.Fragment key={`${date}-${serviceId}`}>
+              <table className="styled-table">
+                <thead>
+                  <tr className="head">
+                    <th className="content-head" colSpan={hours.length + 2}>
+                      Service ID: {serviceId} | Service Name: {flattenedData[0]?.serviceName || 'N/A'} | Territory: {flattenedData[0]?.territory || 'N/A'} | Operator: {flattenedData[0]?.operatorname || 'N/A'} | Partner Name: {flattenedData[0]?.partnerName || 'N/A'} | Service Owner: {flattenedData[0]?.service_owner || 'N/A'} |
+                      <button onClick={() => openModal(serviceId, date, flattenedData)}>
+                        <FontAwesomeIcon icon={faChartBar} />
+                      </button>
+                    </th>
+                  </tr>
+                  <tr className="header-row">
+                    <th>{actDate}</th> {/* Display `actDate` in the table */}
+                    <th>Total CR</th>
+                    {hours.map((hour) => {
+                      const nextHour = Number(hour) + 1; // Ensure hour is treated as a number
+                      return (
+                        <th key={hour}>{`${hour}-${nextHour}`}</th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="cr-row">
+                    <td>CR%</td>
+                    <td style={{ color: getCRColor(parseFloat(calculateCR(
+                      flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+                      flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+                    ).replace('%', ''))) }}>
+                      {calculateCR(
+                        flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
+                        flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
+                      )}
+                    </td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => String(d.hrs) === hour);
+                      const crValue = item ? parseFloat(calculateCR(item.pinVerSucCount, item.pinGenSucCount).replace('%', '')) : null;
+                      return (
+                        <td key={hour} style={{ color: crValue !== null ? getCRColor(crValue) : 'black' }}>
+                          {crValue !== null ? `${crValue}%` : 'NA'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+  
+                  <tr>
+                    <td>Pin Gen</td>
+                    <td>{flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)}</td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => String(d.hrs) === hour);
+                      return <td key={hour}>{item ? item.pinGenSucCount : 0}</td>;
+                    })}
+                  </tr>
+  
+                  <tr className="last-row">
+                    <td>Pin Ver</td>
+                    <td>{flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0)}</td>
+                    {hours.map((hour) => {
+                      const item = flattenedData.find((d) => String(d.hrs) === hour);
+                      return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
+                    })}
+                  </tr>
+  
+                 
+                </tbody>
+              </table>
+            </React.Fragment>
+          );
+        })}
       </div>
-
-      {serviceIds.map((serviceId) => {
-        const flattenedData = groupedData[date][serviceId];
-
-        return (
-          <React.Fragment key={`${date}-${serviceId}`}>
-            <table className="styled-table">
-              <thead>
-                <tr className='head'>
-                  <th className='content-head' colSpan={hours.length + 2}>
-                    Service ID: {serviceId} | Service Name: {flattenedData[0]?.serviceName || 'N/A'} | Territory: {flattenedData[0]?.territory || 'N/A'} | Operator: {flattenedData[0]?.operatorname || 'N/A'} | Partner Name: {flattenedData[0]?.partnerName || 'N/A'} | Service Owner: {flattenedData[0]?.service_owner || 'N/A'} |
-                    <button onClick={() => openModal(serviceId, date, flattenedData)}>
-                      <FontAwesomeIcon icon={faChartBar}/>
-                    </button>
-                  </th>
-                </tr>
-
-                <tr className="header-row">
-                  <th>{actDate}</th> {/* Display `actDate` in the table */}
-                  <th>Total CR</th>
-                  {hours.map((hour) => {
-                    const nextHour = Number(hour) + 1; // Ensure hour is treated as a number
-                    return (
-                      <th key={hour}>{`${hour}-${nextHour}`}</th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-              <tr className="cr-row">
-  <td>CR%</td>
-  <td style={{ color: getCRColor(parseFloat(calculateCR(
-    flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
-    flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
-  ).replace('%', ''))) }}>
-    {calculateCR(
-      flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0),
-      flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)
     )}
-  </td>
-  {hours.map((hour) => {
-    const item = flattenedData.find((d) => String(d.hrs) === hour);
-    const crValue = item ? parseFloat(calculateCR(item.pinVerSucCount, item.pinGenSucCount).replace('%', '')) : null;
-    return (
-      <td key={hour} style={{ color: crValue !== null ? getCRColor(crValue) : 'black' }}>
-        {crValue !== null ? `${crValue}%` : 'NA'}
-      </td>
-    );
-  })}
-</tr>
+  </div>
+  
 
-                <tr>
-                  <td>Pin Gen</td>
-                  <td>{flattenedData.reduce((sum, item) => sum + item.pinGenSucCount, 0)}</td>
-                  {hours.map((hour) => {
-                    const item = flattenedData.find((d) => String(d.hrs) === hour);
-                    return <td key={hour}>{item ? item.pinGenSucCount : 0}</td>;
-                  })}
-                </tr>
-
-                <tr className="last-row">
-                  <td>Pin Ver</td>
-                  <td>{flattenedData.reduce((sum, item) => sum + item.pinVerSucCount, 0)}</td>
-                  {hours.map((hour) => {
-                    const item = flattenedData.find((d) => String(d.hrs) === hour);
-                    return <td key={hour}>{item ? item.pinVerSucCount : 0}</td>;
-                  })}
-                </tr>
-
-                <tr className="gap-row">
-                  <td colSpan={2}></td>
-                  <td colSpan={hours.length}></td>
-                </tr>
-              </tbody>
-            </table>
-          </React.Fragment>
-        );
-      })}
-    </div>
   );
 })}
 

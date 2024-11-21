@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import '../css/Table.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../css/filter.css';
@@ -13,15 +13,43 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
   const [partnerName, setPartnerName] = useState('');
   const [dateError, setDateError] = useState(''); 
 
-  // Extract unique values for dropdowns based on selected service owner
-  const getUniqueValues = (key) => {
-    const filteredData = data.filter((item) => item.service_owner === serviceOwner);
-    return [...new Set(filteredData.map((item) => item[key]))];
-  };
+  useEffect(() => {
+    const savedServiceOwner = localStorage.getItem('serviceOwner');
+  const savedPartnerName = localStorage.getItem('partnerName');
+  const savedTerritory = localStorage.getItem('territory');
+  const savedServiceName = localStorage.getItem('serviceName');
+  const savedOperator = localStorage.getItem('operator');
+  const savedDateRange = JSON.parse(localStorage.getItem('dateRange'));
 
+  if (savedServiceOwner) setServiceOwner(savedServiceOwner);
+  if (savedPartnerName) setPartnerName(savedPartnerName);
+  if (savedTerritory) setTerritory(savedTerritory);
+  if (savedServiceName) setServiceName(savedServiceName);
+  if (savedOperator) setOperator(savedOperator);
+  if (savedDateRange) setDateRange(savedDateRange);
+  }, []);
+
+  // Extract unique values for dropdowns based on selected service owner
+  const getUniqueValues = (key, uppercase = false) => {
+    if (!data) return []; // Return an empty array if data is undefined
+  
+    // Filter data based on serviceOwner, if it's provided
+    const filteredData = serviceOwner
+      ? data.filter((item) => item.service_owner === serviceOwner)
+      : data;
+  
+    // Normalize to uppercase before creating a set to avoid case-sensitive duplicates
+    let uniqueValues = [...new Set(filteredData.map((item) =>
+      uppercase ? item[key].toUpperCase() : item[key]
+    ))];
+  
+    // Return the final array, ensuring all values are uppercase if needed
+    return uppercase ? uniqueValues.map(value => value.toUpperCase()) : uniqueValues;
+  };
+  
   const serviceNames = getUniqueValues('serviceName');
-  const territories = getUniqueValues('territory');
-  const operators = getUniqueValues('operatorname');
+  const territories = getUniqueValues('territory',true);
+  const operators = getUniqueValues('operatorname',true);
   const partnerNames = getUniqueValues('partnerName');
 
   const applyFilters = () => {
@@ -36,7 +64,13 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
     }
     // Clear the error message
     setDateError('');
-
+    // Save selected values to localStorage
+    localStorage.setItem('partnerName', partnerName);
+    localStorage.setItem('territory', territory);
+    localStorage.setItem('serviceName', serviceName);
+    localStorage.setItem('operator', operator);
+    localStorage.setItem('serviceOwner', serviceOwner);
+    localStorage.setItem('dateRange', JSON.stringify(dateRange));
     // Apply the filters
     setFilters({
       serviceOwner,
@@ -68,6 +102,12 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
 
     // Clear the error message
     setDateError('');
+    localStorage.removeItem('partnerName');
+    localStorage.removeItem('territory');
+    localStorage.removeItem('serviceName');
+    localStorage.removeItem('operator');
+    localStorage.removeItem('dateRange');
+    localStorage.removeItem('serviceOwner')
   };
 
   return (
@@ -76,16 +116,24 @@ const Filterdata = ({ setFilters, serviceOwners, data }) => {
         <div className="filter-container">
           {/* Service Owner Dropdown */}
           <div className="service-owner">
-            <label>Service Owner*</label>
-            <select value={serviceOwner} onChange={(e) => setServiceOwner(e.target.value)}>
+          <label>Service Owner*</label>
+          <select value={serviceOwner} onChange={(e) => setServiceOwner(e.target.value)}>
+            {serviceOwner === '' ? (
+              // If no partner is selected, show the placeholder text
               <option value="">Select Service Owner</option>
-              {serviceOwners.map((owner, idx) => (
-                <option key={idx} value={owner}>
-                  {owner}
-                </option>
-              ))}
-            </select>
-          </div>
+            ) : null}
+            {serviceOwner === '' && serviceOwners.map((owner, idx) => (
+              <option key={idx} value={owner}>
+                {owner}
+              </option>
+            ))}
+            {serviceOwner && (
+              // If a partner is selected, show only the selected partner
+              <option value={serviceOwner}>{serviceOwner}</option>
+            )}
+          </select>
+        </div>
+
 
           {/* Date Range Input */}
           <div className="date">

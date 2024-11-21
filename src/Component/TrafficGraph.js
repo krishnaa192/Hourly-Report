@@ -134,33 +134,7 @@ const ThreeLinearChart = ({ data, title }) => {
     };
 
     // Add dots for data points and tooltip interaction
-    ['cr', 'pin-gen', 'pin-ver'].forEach((lineClass, idx) => {
-      g.selectAll(`.dot-${lineClass}`)
-        .data(filteredData)
-        .enter()
-        .append('circle')
-        .attr('class', `dot dot-${lineClass}`)
-        .attr('cx', d => x(d.hour))
-        .attr('cy', d => {
-          let cyValue;
-        
-          if (lineClass === 'cr') {
-            cyValue = y(d.cr);
-          } else if (lineClass === 'pin-gen') {
-            cyValue = yCount(d.pinGenSucCount);
-          } else {
-            cyValue = yCount(d.pinVerSucCount);
-          }
-        
-          // Ensure the cy value is capped at 100
-          return Math.min(cyValue, 100);
-        })
-        
-        .attr('r', 4)
-        .attr('fill', idx === 0 ? '#1f77b4' : idx === 1 ? '#ff7f0e' : '#2ca02c')
-        .on('mouseover', handleMouseOver)
-        .on('mouseout', handleMouseOut);
-    });
+    
   }, [data]);
 
   return (

@@ -72,8 +72,8 @@ const ServiceOwner = ({ data, filters, onClearFilters, onExport }) => {
         (!dateFrom || itemDate >= dateFrom) &&
         (!dateTo || itemDate <= dateTo) &&  // Make sure to check if `itemDate` falls on or before `dateTo`
         (!filters.serviceName || item.serviceName === filters.serviceName) &&
-        (!filters.territory || item.territory === filters.territory) &&
-        (!filters.operator || item.operatorname === filters.operator) &&
+        (!filters.territory || item.territory.toUpperCase() === filters.territory.toUpperCase()) &&
+        (!filters.operator || item.operatorname.toUpperCase() === filters.operator.toUpperCase()) &&
         (!filters.partnerName || item.partnerName === filters.partnerName)
       );
     });

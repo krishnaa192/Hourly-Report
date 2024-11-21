@@ -8,7 +8,7 @@ import { fetchHourlyInappReport } from '../Utils'
 import Loaders from './Loader';
 
 const Hourlydata = () => {
-  const [data, setData] = useState([]); 
+  const [data, setData] = useState([]);
   const [filteredDataTab1, setFilteredDataTab1] = useState([]); // For Tab 1
   const [filteredDataTab2, setFilteredDataTab2] = useState([]); // For Tab 2
   const [loading, setLoading] = useState(true);
@@ -31,17 +31,17 @@ const Hourlydata = () => {
   });
 
   const [activeTab, setActiveTab] = useState('tab1'); // State to track active tab
-
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const result = await fetchHourlyInappReport(); // Use the centralized API call
+        const result = await fetchHourlyInappReport();
         setData(result);
-        setLoading(false);
-        applyFilters(result); // Apply filters for the active tab when data is fetched
+        applyFilters(result);
       } catch (error) {
-        setLoading(false);
         console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -76,10 +76,10 @@ const Hourlydata = () => {
       filtered = filtered.filter((item) => item.serviceName === filtersTab1.serviceName);
     }
     if (filtersTab1.territory) {
-      filtered = filtered.filter((item) => item.territory === filtersTab1.territory);
+      filtered = filtered.filter((item) => item.territory.toUpperCase() === filtersTab1.territory.toUpperCase());
     }
     if (filtersTab1.operator) {
-      filtered = filtered.filter((item) => item.operatorname === filtersTab1.operator);
+      filtered = filtered.filter((item) => item.operatorname.toUpperCase() === filtersTab1.operator.toUpperCase());
     }
     if (filtersTab1.partnerName) {
       filtered = filtered.filter((item) => item.partnerName === filtersTab1.partnerName);
@@ -98,10 +98,11 @@ const Hourlydata = () => {
       filtered = filtered.filter((item) => item.serviceName === filtersTab2.serviceName);
     }
     if (filtersTab2.territory) {
-      filtered = filtered.filter((item) => item.territory === filtersTab2.territory);
+      filtered = filtered.filter((item) => item.territory.toUpperCase() === filtersTab2.territory.toUpperCase());
+
     }
     if (filtersTab2.operator) {
-      filtered = filtered.filter((item) => item.operatorname === filtersTab2.operator);
+      filtered = filtered.filter((item) => item.operatorname.toUpperCase() === filtersTab2.operator.toUpperCase());
     }
 
     setFilteredDataTab2(filtered);
@@ -121,36 +122,87 @@ const Hourlydata = () => {
   }, [activeTab, filtersTab1, filtersTab2, data]);
 
   // Separate filter dropdown options logic for each tab
-  const getUniqueValues = (key, tab) => {
-    let filteredForOptions = data;
+
+  const getFilteredDataForTab = (tab) => {
     if (tab === 'tab1') {
-      // Filtering for options based on Tab 1 filters
-      if (filtersTab1.serviceOwner) {
-        filteredForOptions = data.filter((item) => item.service_owner === filtersTab1.serviceOwner);
-      }
-    } else if (tab === 'tab2') {
-      // Filtering for options based on Tab 2 filters
-      if (filtersTab2.partnerName) {
-        filteredForOptions = data.filter((item) => item.partnerName === filtersTab2.partnerName);
-      }
+      return filtersTab1.serviceOwner
+        ? data.filter((item) =>
+          item.service_owner === filtersTab1.serviceOwner &&
+          item.operatorname.toUpperCase() === filtersTab1.operator.toUpperCase() &&
+          item.territory.toUpperCase() === filtersTab1.territory.toUpperCase()
+        )
+        : data;
     }
-    return [...new Set(filteredForOptions.map((item) => item[key]))];
+    if (tab === 'tab2') {
+      return filtersTab2.partnerName
+        ? data.filter((item) =>
+          item.partnerName === filtersTab2.partnerName &&
+          item.operatorname.toUpperCase() === filtersTab2.operator.toUpperCase() &&
+          item.territory.toUpperCase() === filtersTab2.territory.toUpperCase()
+        )
+        : data;
+    }
+    return data;
   };
 
-  // Separate dropdown values for each tab
-  const serviceOwners = getUniqueValues('service_owner', 'tab1');
-  const serviceNamesTab1 = getUniqueValues('serviceName', 'tab1');
-  const territoriesTab1 = getUniqueValues('territory', 'tab1');
-  const operatorsTab1 = getUniqueValues('operatorname', 'tab1');
-  const partnerNamesTab1 = getUniqueValues('partnerName', 'tab1');
 
-  const serviceNamesTab2 = getUniqueValues('serviceName', 'tab2');
-  const territoriesTab2 = getUniqueValues('territory', 'tab2');
-  const operatorsTab2 = getUniqueValues('operatorname', 'tab2');
-  const partnerNamesTab2 = getUniqueValues('partnerName', 'tab2');
+  const getUniqueValuesForTab = (tab) => {
+    const filteredData =
+      tab === 'tab1'
+        ? data.filter((item) => {
+          return (
+            (!filtersTab1.serviceOwner || item.service_owner === filtersTab1.serviceOwner) &&
+            (!filtersTab1.serviceName || item.serviceName === filtersTab1.serviceName) &&
+            (!filtersTab1.territory || item.territory.toUpperCase() === filtersTab1.territory.toUpperCase()) &&
+            (!filtersTab1.operator || item.operatorname.toUpperCase() === filtersTab1.operator.toUpperCase())
+          );
+        })
+        : data.filter((item) => {
+          return (
+            (!filtersTab2.partnerName || item.partnerName === filtersTab2.partnerName) &&
+            (!filtersTab2.serviceName || item.serviceName === filtersTab2.serviceName) &&
+            (!filtersTab2.territory || item.territory.toUpperCase() === filtersTab2.territory.toUpperCase()) &&
+            (!filtersTab2.operator || item.operatorname.toUpperCase() === filtersTab2.operator.toUpperCase())
+          );
+        });
+
+    const uniqueValues = {
+      serviceOwners: [...new Set(filteredData.map((item) => item.service_owner))],
+      serviceNames: [...new Set(filteredData.map((item) => item.serviceName))],
+      territories: [...new Set(filteredData.map((item) => item.territory))].map((territory) => territory.toUpperCase()),
+   
+      operators: [...new Set(filteredData.map((item) => item.operatorname))].map((operator) => operator.toUpperCase()),
+      partnerNames: [...new Set(filteredData.map((item) => item.partnerName))],
+    };
+
+   
+
+    return uniqueValues;
+  };
+
+
+  const tab1Values = getUniqueValuesForTab('tab1');
+  const tab2Values = getUniqueValuesForTab('tab2');
+ 
+
+  const {
+    serviceOwners: serviceOwnersTab1,
+    serviceNames: serviceNamesTab1,
+    territories: territoriesTab1,
+    operators: operatorsTab1,
+    partnerNames: partnerNamesTab1,
+  } = tab1Values;
+
+  const {
+    serviceNames: serviceNamesTab2,
+    territories: territoriesTab2,
+    operators: operatorsTab2,
+    partnerNames: partnerNamesTab2,
+  } = tab2Values;
+
 
   if (loading) {
-    return <Loaders/>;
+    return <Loaders />;
   }
 
   return (
@@ -174,7 +226,7 @@ const Hourlydata = () => {
         <>
           <Filterdata
             setFilters={setFiltersTab1}
-            serviceOwners={serviceOwners}
+            serviceOwners={serviceOwnersTab1}
             serviceNames={serviceNamesTab1}
             territories={territoriesTab1}
             operators={operatorsTab1}
@@ -192,11 +244,12 @@ const Hourlydata = () => {
             setFilters={setFiltersTab2}
             partnerNames={partnerNamesTab2}
             serviceNames={serviceNamesTab2}
-            territories={territoriesTab2}
-            operators={operatorsTab2}
-            data={data} 
-            applyFilters={() => applyFilters(data)} 
+            territories={territoriesTab2.map((territory) => territory.toUpperCase())}  // Corrected
+            operators={operatorsTab2.map((operator) => operator.toUpperCase())}  // Corrected
+            data={data}
+            applyFilters={() => applyFilters(data)}
           />
+
           <TrafficDataComponent data={filteredDataTab2} filters={filtersTab2} />
         </>
       )}

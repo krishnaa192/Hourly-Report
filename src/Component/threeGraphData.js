@@ -36,7 +36,7 @@ const ThreeDataGraph = ({ serviceID, selectedDate, isOpen, onRequestClose, initi
           }
 
           const serviceId = item.appServiceId.toString();
-          const date = formatDate(item.timestamp);
+          const date = formatDate(item.actDate);
 
           if (!acc[serviceId]) {
             acc[serviceId] = {};

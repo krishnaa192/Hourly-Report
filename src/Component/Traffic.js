@@ -42,7 +42,7 @@ const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
   const getCRColor = (crPercentage) => {
     const crValue = parseFloat(crPercentage);
     if (crValue <= 25) return 'red';
-    if (crValue <= 50) return 'orange';
+    if (crValue <= 35) return 'orange';
     return 'green';
   };
 
@@ -139,17 +139,19 @@ const TrafficDataComponent = ({ data, filters, onClearFilters, onExport }) => {
 
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
+  
     return data.filter(item => {
       return (
         (!filters.partnerName || item.partnerName === filters.partnerName) &&
         (!filters.dateRange.from || new Date(item.actDate) >= new Date(filters.dateRange.from)) &&
         (!filters.dateRange.to || new Date(item.actDate) <= new Date(filters.dateRange.to)) &&
         (!filters.serviceName || item.serviceName === filters.serviceName) &&
-        (!filters.territory || item.territory === filters.territory) &&
-        (!filters.operator || item.operatorname === filters.operator)
+        (!filters.territory || item.territory.toUpperCase() === filters.territory.toUpperCase()) && // Compare in uppercase
+        (!filters.operator || item.operatorname.toUpperCase() === filters.operator.toUpperCase())
       );
     });
   }, [data, filters]);
+  
 
   const groupedData = useMemo(() => {
     if (!filteredData || filteredData.length === 0) return {};
